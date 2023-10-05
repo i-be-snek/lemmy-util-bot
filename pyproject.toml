@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "reddit-lemmy-mirror-bot"
+version = "0.1.0"
+description = ""
+authors = ["i-be-snek <sjzahra@proton.me>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.12" 
+requests = "^2.31.0"
+praw = "^7.7.1"
+pythorhead = ">=0.15"
+python-dotenv = "^1.0.0"
+ipykernel = "^6.25.2"
+
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.25.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
