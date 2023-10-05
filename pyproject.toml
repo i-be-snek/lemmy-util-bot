@@ -12,6 +12,7 @@ praw = "^7.7.1"
 pythorhead = ">=0.15"
 python-dotenv = "^1.0.0"
 ipykernel = "^6.25.2"
+tinydb = "^4.8.0"
 
 
 [tool.poetry.group.dev.dependencies]
