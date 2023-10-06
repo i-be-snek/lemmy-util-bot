@@ -138,7 +138,6 @@ def to_lemmy(threads_to_mirror: dict):
 
     # add the reddit permalink to the post
     for thread in threads_to_mirror:
-
         # double check if this thread has already been mirrored
         if DB.search(q.reddit_id == thread["reddit_id"]):
             logging.info(
@@ -157,7 +156,11 @@ def to_lemmy(threads_to_mirror: dict):
         )
 
         # add flair if it exists
-        thread_title = f"{thread['flair']} {thread['title']}" if thread['flair'] else thread['title']
+        thread_title = (
+            f"{thread['flair']} {thread['title']}"
+            if thread["flair"]
+            else thread["title"]
+        )
 
         try:
             lemmy.post.create(
