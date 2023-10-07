@@ -1,91 +1,57 @@
+import logging
+from typing import List, Union
+
 import praw
+from praw.reddit import Submission
 from pythorhead import Lemmy
 from pythorhead.types import LanguageType
-from dotenv import dotenv_values
-from typing import Union
-import logging
-from tinydb import TinyDB, Query
+from tinydb import Query, TinyDB
 
-logging.basicConfig(filename="mirror.log", encoding="utf-8", level=logging.DEBUG)
+logging.basicConfig(
+format='%(asctime)s %(levelname)-8s %(message)s',
+level=logging.INFO,
+datefmt='%Y-%m-%d %H:%M:%S')
 
-# load env vars (TODO: later, use praw.ini)
-
-config = dotenv_values(".env")
-
-logging.info(".env loaded")
-
-LEMMY_USERNAME = config["LEMMY_USERNAME"]
-LEMMY_PASSWORD = config["LEMMY_PASSWORD"]
-LEMMY_INSTANCE = config["LEMMY_INSTANCE"]
-LEMMY_COMMUNITY = config["LEMMY_COMMUNITY"]
-
-REDDIT_CLIENT_ID = config["REDDIT_CLIENT_ID"]
-REDDIT_CLIENT_SECRET = config["REDDIT_CLIENT_SECRET"]
-REDDIT_PASSWORD = config["REDDIT_PASSWORD"]
-REDDIT_USER_AGENT = config["REDDIT_USER_AGENT"]
-REDDIT_USERNAME = config["REDDIT_USERNAME"]
-REDDIT_SUBREDDIT = config["REDDIT_SUBREDDIT"]
-
+# TODO: is this okay as a global var?
 DB = TinyDB("db.json")
 
-
-def _getattr_mod(__o: object, __name: str):
-    try:
-        return getattr(__o, __name)
-    except AttributeError:
-        return None
-
-
-# authenticate with reddit with OAuth
-def get_reddit_threads(limit: int = 100):
-    reddit = praw.Reddit(
-        client_id=REDDIT_CLIENT_ID,
-        client_secret=REDDIT_CLIENT_SECRET,
-        password=REDDIT_PASSWORD,
-        user_agent=REDDIT_USER_AGENT,
-        redirect_url="http://localhost:8080",
-        username=REDDIT_USERNAME,
-    )
-
-    logging.info(f"Logged into Reddit as {reddit.user.me()}")
-
-    # validate limit
-    if limit > 100:
-        logging.info("Max limit is 100, limit now set to 100.")
-        limit = 100
-
-    # check every hour/minute:
-
-    # grab latest reddit posts (sorted by "new")
-
-    subreddit = reddit.subreddit(REDDIT_SUBREDDIT)
-    logging.info(f"Subreddit: {subreddit}")
-    listing = subreddit.new(limit=limit)
-
-    # load a list of mirrored posts
-    # TODO: filter out posts that have already been mirrored
-    threads_to_mirror = []
+def _check_thread_in_db(reddit_id: str) -> bool:
     q = Query()
+    if DB.search(q.reddit_id == reddit_id):
+        logging.info(f"Post with id {reddit_id} has already been mirrored.")
+        return True
+    return False
+
+
+def _insert_thread_into_db(thread: dict) -> None:
+    try:
+        DB.insert(thread)
+        logging.info(f"Inserted {thread['reddit_id']} into TinyDB")
+    except Exception as e:
+        logging.error(f"Could not insert {thread['reddit_id']} into TinyDB. Exception: {e}")
+
+
+def _extract_threads_to_mirror(listing: List[Submission]) -> List[dict]:
+    threads_to_mirror = []
 
     for i in listing:
+        print(i.title)
         reddit_id: str = _getattr_mod(i, "name")
-        if DB.search(q.reddit_id == reddit_id):
-            logging.info(f"Post with id {i} has already been mirrored.")
-            is_mirrored = True
-        else:
-            is_mirrored = False
-
+        is_mirrored = True if _check_thread_in_db(reddit_id) else False
         is_pinned: bool = False if _getattr_mod(i, "sitckied") == None else True
-        is_nswf: bool = _getattr_mod(i, "over_18")
+        is_nsfw: bool = _getattr_mod(i, "over_18")
         is_poll: bool = True if _getattr_mod(i, "poll_data") else False
         is_locked: bool = _getattr_mod(i, "locked")
 
-        if is_pinned or is_nswf or is_poll or is_locked or is_mirrored:
-            # ignore pinned, nsf, poll, and locked threads
+        logging.info(f"Checking post {reddit_id}...")
+        
+        if is_pinned or is_nsfw or is_poll or is_locked or is_mirrored:
             logging.info(
-                f"""
-                Ignoring submission {i.name} with title {i.title}; is_pinned: {is_pinned}; is_nswf: {is_nswf}; is_poll: {is_poll}; is_locked: {is_locked}; is_mirrored --> {is_mirrored}
-            """
+                f"""Ignoring submission {i.name} with title {i.title}; is_pinned: {is_pinned};\n
+                is_nsfw: {is_nsfw}; is_poll: {is_poll}; is_locked: {is_locked}; is_mirrored --> {is_mirrored}
+            """.replace(
+                    "\n", " "
+                )
             )
 
         else:
@@ -103,79 +69,88 @@ def get_reddit_threads(limit: int = 100):
             is_video: bool = _getattr_mod(i, "is_video")
 
             data = {
-                # "submission_obj": i,
                 "url": url,
                 "url_attr": url_attr,
                 "title": title,
+                "body_attr": body_attr,
                 "body": body,
                 "permalink": permalink,
                 "reddit_id": reddit_id,
                 "flair": flair,
                 "is_video": is_video,
                 "is_pinned": is_pinned,
-                "is_nswf": is_nswf,
+                "is_nsfw": is_nsfw,
                 "is_poll": is_poll,
                 "is_locked": is_locked,
             }
             logging.info(f"Committing submission {i.name} with title {i.title}")
             threads_to_mirror.append(data)
-
-    logging.info(f"Found {len(threads_to_mirror)} threads to mirror")
+        
     return threads_to_mirror
 
 
-def to_lemmy(threads_to_mirror: dict):
-    # authenticate with lemmy
-    lemmy = Lemmy(LEMMY_INSTANCE)
-    lemmy.log_in(LEMMY_USERNAME, LEMMY_PASSWORD)
-    community_id = lemmy.discover_community(LEMMY_COMMUNITY)
+def _getattr_mod(__o: object, __name: str) -> Union[str, None]:
+    try:
+        return getattr(__o, __name)
+    except AttributeError:
+        return None
 
-    # TODO: add code to pythorhead to get the name of the user logged in
-    logging.info(f"Logged into Lemmy as {LEMMY_USERNAME}")
 
-    # create a mirror post on lemmy
-    q = Query()
+def get_threads_from_reddit(reddit: praw.Reddit, subreddit_name: str, limit: int = 100) -> List[Submission]:
+    if limit > 100:
+        logging.info(
+            f"Max limit of submissions to return is 100. The limit arg ({limit}) has now been set to 100."
+        )
+        limit = 100
 
-    # add the reddit permalink to the post
+    subreddit = reddit.subreddit(subreddit_name)
+    logging.info(f"Searching subreddit r/{subreddit}")
+
+    listing = subreddit.new(limit=limit)
+    logging.info(f"Grabbed a list of threads from Reddit")
+
+    threads_to_mirror = _extract_threads_to_mirror(listing=listing)
+    logging.info(f"Found {len(threads_to_mirror)} threads to mirror")
+
+    return threads_to_mirror
+
+
+def mirror_threads_to_lemmy(lemmy: Lemmy, threads_to_mirror: dict, community: str) -> None:
+    community_id = lemmy.discover_community(community)
+
     for thread in threads_to_mirror:
-        # double check if this thread has already been mirrored
-        if DB.search(q.reddit_id == thread["reddit_id"]):
-            logging.info(
-                f"Post with id {thread['reddit_id']} has already been mirrored."
-            )
-            pass
+        if not _check_thread_in_db(thread["reddit_id"]):
+            # generate a bot disclaimer
+            bot_body = f"(This post was mirrored by a bot. [The original post can be found here]({thread['permalink']}))"
 
-        # generate a bot disclaimer
-        bot_body = f"(This post was mirrored by a bot. [The original post can be found here]({thread['permalink']}))"
-
-        # add the bot disclaimer to the post and link to the original content
-        post_body = (
-            thread["body"] + "\n\n" + bot_body
-            if isinstance(thread["body"], str)
-            else bot_body
-        )
-
-        # add flair if it exists
-        thread_title = (
-            f"{thread['flair']} {thread['title']}"
-            if thread["flair"]
-            else thread["title"]
-        )
-
-        try:
-            lemmy.post.create(
-                community_id=community_id,
-                name=thread_title,
-                url=thread["url"],
-                nsfw=None,
-                body=post_body,
-                language_id=LanguageType.EN,
+            # add the bot disclaimer to the post and link to the original content
+            post_body = (
+                thread["body"] + "\n\n" + bot_body
+                if isinstance(thread["body"], str)
+                else bot_body
             )
 
-            DB.insert(thread)
-            logging.info(f"Inserted {thread['reddit_id']} into TinyDB")
-
-        except Exception as e:
-            logging.error(
-                f"Lemmy cound not create a post for thread {thread['reddit_id']}. Exception {e}."
+            # add flair if it exists
+            thread_title = (
+                f"{thread['flair']} {thread['title']}"
+                if thread["flair"]
+                else thread["title"]
             )
+
+            try:
+                lemmy.post.create(
+                    community_id=community_id,
+                    name=thread_title,
+                    url=thread["url"],
+                    nsfw=None,
+                    body=post_body,
+                    language_id=LanguageType.EN,
+                )
+                logging.info(f"Posted thread with reddit_id {thread['reddit_id']} in {community}")
+                
+                _insert_thread_into_db(thread)
+
+            except Exception as e:
+                logging.error(
+                    f"Lemmy cound not create a post for thread {thread['reddit_id']}. Exception {e}."
+                )
