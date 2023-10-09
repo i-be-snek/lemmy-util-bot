@@ -3,9 +3,9 @@ from mirror_bot.helper import check_configs
 from mirror_bot.auth import reddit_oauth, lemmy_auth
 
 from dotenv import dotenv_values
+from tinydb import TinyDB
 
-
-def mirror():
+def mirror(db_path: str = "db.json"):
     config = dotenv_values(".env")
     if not check_configs(config):
         return
@@ -30,10 +30,12 @@ def mirror():
         REDDIT_USERNAME,
     )
 
+    DB = TinyDB(db_path)
+
     if not reddit:
         return
 
-    threads = get_threads_from_reddit(reddit, REDDIT_SUBREDDIT)
+    threads = get_threads_from_reddit(reddit, REDDIT_SUBREDDIT, DB)
     
     if threads:
         lemmy = lemmy_auth(LEMMY_USERNAME, LEMMY_PASSWORD, LEMMY_INSTANCE)
@@ -41,7 +43,9 @@ def mirror():
         if not lemmy:
             return
 
-        mirror_threads_to_lemmy(lemmy, threads, LEMMY_COMMUNITY)
+        mirror_threads_to_lemmy(lemmy, threads, LEMMY_COMMUNITY, DB)
+        
+    DB.close()
 
 if __name__ == "__main__":
     mirror()

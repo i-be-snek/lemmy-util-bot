@@ -2,20 +2,20 @@ import logging
 from typing import List, Union
 
 import praw
+from praw.models import ListingGenerator
 from praw.reddit import Submission
 from pythorhead import Lemmy
 from pythorhead.types import LanguageType
 from tinydb import Query, TinyDB
 
 logging.basicConfig(
-format='%(asctime)s %(levelname)-8s %(message)s',
-level=logging.INFO,
-datefmt='%Y-%m-%d %H:%M:%S')
+    format="%(asctime)s %(levelname)-8s %(message)s",
+    level=logging.INFO,
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
-# TODO: is this okay as a global var?
-DB = TinyDB("db.json")
 
-def _check_thread_in_db(reddit_id: str) -> bool:
+def _check_thread_in_db(reddit_id: str, DB: TinyDB) -> bool:
     q = Query()
     if DB.search(q.reddit_id == reddit_id):
         logging.info(f"Post with id {reddit_id} has already been mirrored.")
@@ -23,28 +23,30 @@ def _check_thread_in_db(reddit_id: str) -> bool:
     return False
 
 
-def _insert_thread_into_db(thread: dict) -> None:
+def _insert_thread_into_db(thread: dict, DB: TinyDB) -> None:
     try:
         DB.insert(thread)
         logging.info(f"Inserted {thread['reddit_id']} into TinyDB")
     except Exception as e:
-        logging.error(f"Could not insert {thread['reddit_id']} into TinyDB. Exception: {e}")
+        logging.error(
+            f"Could not insert {thread['reddit_id']} into TinyDB. Exception: {e}"
+        )
 
 
-def _extract_threads_to_mirror(listing: List[Submission]) -> List[dict]:
+# TODO: fix type, this isn't a list with submissions, it's a generator
+def _extract_threads_to_mirror(listing: ListingGenerator, DB: TinyDB) -> List[dict]:
     threads_to_mirror = []
-
     for i in listing:
         print(i.title)
         reddit_id: str = _getattr_mod(i, "name")
-        is_mirrored = True if _check_thread_in_db(reddit_id) else False
+        is_mirrored = True if _check_thread_in_db(reddit_id, DB) else False
         is_pinned: bool = False if _getattr_mod(i, "sitckied") == None else True
         is_nsfw: bool = _getattr_mod(i, "over_18")
         is_poll: bool = True if _getattr_mod(i, "poll_data") else False
         is_locked: bool = _getattr_mod(i, "locked")
 
         logging.info(f"Checking post {reddit_id}...")
-        
+
         if is_pinned or is_nsfw or is_poll or is_locked or is_mirrored:
             logging.info(
                 f"""Ignoring submission {i.name} with title {i.title}; is_pinned: {is_pinned};\n
@@ -85,7 +87,7 @@ def _extract_threads_to_mirror(listing: List[Submission]) -> List[dict]:
             }
             logging.info(f"Committing submission {i.name} with title {i.title}")
             threads_to_mirror.append(data)
-        
+
     return threads_to_mirror
 
 
@@ -96,7 +98,9 @@ def _getattr_mod(__o: object, __name: str) -> Union[str, None]:
         return None
 
 
-def get_threads_from_reddit(reddit: praw.Reddit, subreddit_name: str, limit: int = 100) -> List[Submission]:
+def get_threads_from_reddit(
+    reddit: praw.Reddit, subreddit_name: str, DB: TinyDB, limit: int = 100
+) -> List[Submission]:
     if limit > 100:
         logging.info(
             f"Max limit of submissions to return is 100. The limit arg ({limit}) has now been set to 100."
@@ -109,17 +113,19 @@ def get_threads_from_reddit(reddit: praw.Reddit, subreddit_name: str, limit: int
     listing = subreddit.new(limit=limit)
     logging.info(f"Grabbed a list of threads from Reddit")
 
-    threads_to_mirror = _extract_threads_to_mirror(listing=listing)
+    threads_to_mirror = _extract_threads_to_mirror(listing=listing, DB=DB)
     logging.info(f"Found {len(threads_to_mirror)} threads to mirror")
 
     return threads_to_mirror
 
 
-def mirror_threads_to_lemmy(lemmy: Lemmy, threads_to_mirror: dict, community: str) -> None:
+def mirror_threads_to_lemmy(
+    lemmy: Lemmy, threads_to_mirror: dict, community: str, DB: TinyDB
+) -> None:
     community_id = lemmy.discover_community(community)
 
     for thread in threads_to_mirror:
-        if not _check_thread_in_db(thread["reddit_id"]):
+        if not _check_thread_in_db(thread["reddit_id"], DB):
             # generate a bot disclaimer
             bot_body = f"(This post was mirrored by a bot. [The original post can be found here]({thread['permalink']}))"
 
@@ -146,9 +152,11 @@ def mirror_threads_to_lemmy(lemmy: Lemmy, threads_to_mirror: dict, community: st
                     body=post_body,
                     language_id=LanguageType.EN,
                 )
-                logging.info(f"Posted thread with reddit_id {thread['reddit_id']} in {community}")
-                
-                _insert_thread_into_db(thread)
+                logging.info(
+                    f"Posted thread with reddit_id {thread['reddit_id']} in {community}"
+                )
+
+                _insert_thread_into_db(thread, DB)
 
             except Exception as e:
                 logging.error(

@@ -40,10 +40,15 @@ def lemmy_auth(
 ) -> Union[Lemmy, None]:
     try:
         lemmy = Lemmy(LEMMY_INSTANCE)
+
+    except Exception as e:
+        logging.error(f"Could not find Lemmy instance. Exception {e}.")
+        return None
+
+    try:
         lemmy.log_in(LEMMY_USERNAME, LEMMY_PASSWORD)
         logging.info(f"Logged into Lemmy as {LEMMY_USERNAME}")
 
     except Exception as e:
-        lemmy = None
         logging.error(f"Could not log into Lemmy. Exception {e}.")
-    return lemmy
+        return None
