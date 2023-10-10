@@ -12,21 +12,15 @@ logging.basicConfig(
 )
 
 
-def reddit_oauth(
-    REDDIT_CLIENT_ID: str,
-    REDDIT_CLIENT_SECRET: str,
-    REDDIT_PASSWORD: str,
-    REDDIT_USER_AGENT: str,
-    REDDIT_USERNAME: str,
-) -> Union[Reddit, None]:
+def reddit_oauth(config: dict) -> Union[Reddit, None]:
     try:
         reddit = praw.Reddit(
-            client_id=REDDIT_CLIENT_ID,
-            client_secret=REDDIT_CLIENT_SECRET,
-            password=REDDIT_PASSWORD,
-            user_agent=REDDIT_USER_AGENT,
+            client_id=config.REDDIT_CLIENT_ID,
+            client_secret=config.REDDIT_CLIENT_SECRET,
+            password=config.REDDIT_PASSWORD,
+            user_agent=config.REDDIT_USER_AGENT,
             redirect_url="http://localhost:8080",
-            username=REDDIT_USERNAME,
+            username=config.REDDIT_USERNAME,
         )
         logging.info(f"Logged into Reddit as {reddit.user.me()}")
     except Exception as e:
@@ -35,19 +29,30 @@ def reddit_oauth(
     return reddit
 
 
-def lemmy_auth(
-    LEMMY_USERNAME: str, LEMMY_PASSWORD: str, LEMMY_INSTANCE: str
-) -> Union[Lemmy, None]:
+def lemmy_auth(config: dict) -> Union[Lemmy, None]:
+    lemmy = lemmy_init_instance(config.LEMMY_INSTANCE)
+
+    if lemmy:
+        lemmy_login(config.LEMMY_USERNAME, config.LEMMY_PASSWORD)
+
+    return lemmy
+
+
+def lemmy_init_instance(lemmy_instance: str) -> Lemmy:
     try:
-        lemmy = Lemmy(LEMMY_INSTANCE)
+        lemmy = Lemmy(lemmy_instance, raise_exceptions=True)
+        return lemmy
 
     except Exception as e:
         logging.error(f"Could not find Lemmy instance. Exception {e}.")
         return None
 
+
+def lemmy_login(lemmy_username: str, lemmy_password: str) -> Lemmy:
     try:
-        lemmy.log_in(LEMMY_USERNAME, LEMMY_PASSWORD)
-        logging.info(f"Logged into Lemmy as {LEMMY_USERNAME}")
+        lemmy.log_in(lemmy_username, lemmy_password)
+        logging.info(f"Logged into Lemmy as {lemmy_username}")
+        return lemmy
 
     except Exception as e:
         logging.error(f"Could not log into Lemmy. Exception {e}.")

@@ -1,7 +1,9 @@
 import logging
 from typing import List, Union
+from unittest import mock
 
 import praw
+import pytest
 from praw.models import ListingGenerator
 from praw.reddit import Submission
 from pythorhead import Lemmy
@@ -120,10 +122,12 @@ def get_threads_from_reddit(
 
 
 def mirror_threads_to_lemmy(
-    lemmy: Lemmy, threads_to_mirror: dict, community: str, DB: TinyDB
-) -> None:
+    lemmy: Lemmy, threads_to_mirror: List[dict], community: str, DB: TinyDB
+) -> int:
     community_id = lemmy.discover_community(community)
 
+    num_mirrored_posts = 0
+    posted = False
     for thread in threads_to_mirror:
         if not _check_thread_in_db(thread["reddit_id"], DB):
             # generate a bot disclaimer
@@ -152,13 +156,18 @@ def mirror_threads_to_lemmy(
                     body=post_body,
                     language_id=LanguageType.EN,
                 )
-                logging.info(
-                    f"Posted thread with reddit_id {thread['reddit_id']} in {community}"
-                )
-
-                _insert_thread_into_db(thread, DB)
+                posted = True
 
             except Exception as e:
                 logging.error(
                     f"Lemmy cound not create a post for thread {thread['reddit_id']}. Exception {e}."
                 )
+
+            if posted:
+                num_mirrored_posts += 1
+                _insert_thread_into_db(thread, DB)
+                logging.info(
+                    f"Posted thread with reddit_id {thread['reddit_id']} in {community}"
+                )
+
+    return num_mirrored_posts
