@@ -34,8 +34,8 @@ def lemmy_auth(config: dict) -> Union[Lemmy, None]:
 
     if lemmy:
         lemmy_login(config.LEMMY_USERNAME, config.LEMMY_PASSWORD)
-
-    return lemmy
+        return lemmy
+    return None
 
 
 def lemmy_init_instance(lemmy_instance: str) -> Lemmy:
