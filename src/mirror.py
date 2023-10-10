@@ -61,6 +61,7 @@ def _extract_threads_to_mirror(listing: ListingGenerator, DB: TinyDB) -> List[di
         else:
             # if the reddit_id is in the url, it's the url to the reddit post
             # otherwise, it's the url to external content embedded into the thread
+            # the same goes for reddit gallery links
             url_attr = _getattr_mod(i, "url")
             url: Union[str, None] = (
                 None if reddit_id.split("_", 1)[1] in url_attr else url_attr
@@ -70,6 +71,8 @@ def _extract_threads_to_mirror(listing: ListingGenerator, DB: TinyDB) -> List[di
             body: Union[str, None] = None if body_attr == "" else body_attr
             permalink: str = f"https://www.reddit.com{_getattr_mod(i, 'permalink')}"
             flair: Union[str, None] = _getattr_mod(i, "link_flair_text")
+            flair = flair.strip() if flair else None
+
             is_video: bool = _getattr_mod(i, "is_video")
 
             data = {
