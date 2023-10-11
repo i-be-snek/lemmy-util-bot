@@ -9,6 +9,7 @@ from praw.reddit import Submission
 from pythorhead import Lemmy
 from pythorhead.types import LanguageType
 from tinydb import Query, TinyDB
+from time import sleep
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(message)s",
@@ -125,13 +126,14 @@ def get_threads_from_reddit(
 
 
 def mirror_threads_to_lemmy(
-    lemmy: Lemmy, threads_to_mirror: List[dict], community: str, DB: TinyDB
+    lemmy: Lemmy, threads_to_mirror: List[dict], community: str, DB: TinyDB, delay: int = 30
 ) -> int:
     community_id = lemmy.discover_community(community)
 
     num_mirrored_posts = 0
     posted = False
     for thread in threads_to_mirror:
+        sleep(delay)
         if not _check_thread_in_db(thread["reddit_id"], DB):
             # generate a bot disclaimer
             bot_body = f"(This post was mirrored by a bot. [The original post can be found here]({thread['permalink']}))"
