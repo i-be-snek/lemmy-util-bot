@@ -33,7 +33,7 @@ def lemmy_auth(config: dict) -> Union[Lemmy, None]:
     lemmy = lemmy_init_instance(config.LEMMY_INSTANCE)
 
     if lemmy:
-        lemmy_login(config.LEMMY_USERNAME, config.LEMMY_PASSWORD)
+        lemmy_login(lemmy, config.LEMMY_USERNAME, config.LEMMY_PASSWORD)
         return lemmy
     return None
 
@@ -48,7 +48,7 @@ def lemmy_init_instance(lemmy_instance: str) -> Lemmy:
         return None
 
 
-def lemmy_login(lemmy_username: str, lemmy_password: str) -> Lemmy:
+def lemmy_login(lemmy: Lemmy, lemmy_username: str, lemmy_password: str) -> Lemmy:
     try:
         lemmy.log_in(lemmy_username, lemmy_password)
         logging.info(f"Logged into Lemmy as {lemmy_username}")

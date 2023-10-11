@@ -2,6 +2,7 @@ from unittest import mock
 
 import praw
 import pytest
+from pythorhead import Lemmy
 
 from src.auth import lemmy_auth, lemmy_init_instance, lemmy_login, reddit_oauth
 from src.helper import Config
@@ -29,9 +30,14 @@ class TestClassAuthBadConfig:
         assert lemmy_init_instance(incorrect_configs.LEMMY_INSTANCE) == None
 
     def test_lemmy_login_fail(self, incorrect_configs):
+        mock_lemmy = mock.Mock()
+        mock_lemmy.log_in = mock.MagicMock(side_effect=Exception("Test"))
+
         assert (
             lemmy_login(
-                incorrect_configs.LEMMY_USERNAME, incorrect_configs.LEMMY_PASSWORD
+                mock_lemmy,
+                incorrect_configs.LEMMY_USERNAME,
+                incorrect_configs.LEMMY_PASSWORD,
             )
             == None
         )

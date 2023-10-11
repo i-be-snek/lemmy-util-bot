@@ -45,6 +45,7 @@ class TestClassMirror:
             threads_to_mirror=[],
             community="fake_community",
             DB=test_db,
+            delay=0
         )
         assert mirror == 0
         test_db.close()
@@ -58,6 +59,7 @@ class TestClassMirror:
             threads_to_mirror=threads_to_mirror,
             community="fake_community",
             DB=test_db,
+            delay=0
         )
         assert mirror == 0
         test_db.close()
