@@ -76,23 +76,24 @@ def _extract_threads_to_mirror(listing: ListingGenerator, DB: TinyDB) -> List[di
 
             is_video: bool = _getattr_mod(i, "is_video")
 
-            data = {
-                "url": url,
-                "url_attr": url_attr,
-                "title": title,
-                "body_attr": body_attr,
-                "body": body,
-                "permalink": permalink,
-                "reddit_id": reddit_id,
-                "flair": flair,
-                "is_video": is_video,
-                "is_pinned": is_pinned,
-                "is_nsfw": is_nsfw,
-                "is_poll": is_poll,
-                "is_locked": is_locked,
-            }
-            logging.info(f"Committing submission {i.name} with title {i.title}")
-            threads_to_mirror.append(data)
+            if url:
+                data = {
+                    "url": url,
+                    "url_attr": url_attr,
+                    "title": title,
+                    "body_attr": body_attr,
+                    "body": body,
+                    "permalink": permalink,
+                    "reddit_id": reddit_id,
+                    "flair": flair,
+                    "is_video": is_video,
+                    "is_pinned": is_pinned,
+                    "is_nsfw": is_nsfw,
+                    "is_poll": is_poll,
+                    "is_locked": is_locked,
+                }
+                logging.info(f"Committing submission {i.name} with title {i.title}")
+                threads_to_mirror.append(data)
 
     return threads_to_mirror
 
@@ -126,7 +127,11 @@ def get_threads_from_reddit(
 
 
 def mirror_threads_to_lemmy(
-    lemmy: Lemmy, threads_to_mirror: List[dict], community: str, DB: TinyDB, delay: int = 30
+    lemmy: Lemmy,
+    threads_to_mirror: List[dict],
+    community: str,
+    DB: TinyDB,
+    delay: int = 30,
 ) -> int:
     community_id = lemmy.discover_community(community)
 
@@ -152,17 +157,19 @@ def mirror_threads_to_lemmy(
                 else thread["title"]
             )
 
+            # only mirror posts with links
+            thread_url = thread["url"]
+
             try:
                 lemmy.post.create(
                     community_id=community_id,
                     name=thread_title,
-                    url=thread["url"],
+                    url=thread_url,
                     nsfw=None,
                     body=post_body,
                     language_id=LanguageType.EN,
                 )
                 posted = True
-
             except Exception as e:
                 logging.error(
                     f"Lemmy cound not create a post for thread {thread['reddit_id']}. Exception {e}."

@@ -64,6 +64,26 @@ class TestClassMirror:
         assert mirror == 0
         test_db.close()
 
+    def test_mirror_threads_to_lemmy_no_url(self):
+        test_db = TinyDB(items.test_db_path)
+        mock_lemmy = mock.Mock()
+        threads_to_mirror = [items.thread_no_url, items.thread]
+        mirror = mirror_threads_to_lemmy(
+            lemmy=mock_lemmy,
+            threads_to_mirror=threads_to_mirror,
+            community="fake_community",
+            DB=test_db,
+            delay=0
+        )
+        
+        q = Query()
+        test_db.remove(q.reddit_id == items.thread_no_url['reddit_id'])
+        test_db.remove(q.reddit_id == items.thread['reddit_id'])
+
+        test_db.close()
+        assert mirror == 1
+
+
     def test__getattr_mod_success(self):
         assert _getattr_mod(os, "__name__") == "os"
 
