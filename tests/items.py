@@ -42,4 +42,19 @@ thread = {
     "is_locked": False,
 }
 
+thread_no_url = {
+    "url": None,
+    "url_attr": None,
+    "title": "Example title",
+    "body": "Example body",
+    "permalink": "https://www.reddit.com/r/example/example_thread",
+    "reddit_id": "test_150jhtj",
+    "flair": None,
+    "is_video": False,
+    "is_pinned": False,
+    "is_nswf": False,
+    "is_poll": False,
+    "is_locked": False,
+}
+
 test_db_path = "tests/test_db.json"

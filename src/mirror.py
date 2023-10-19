@@ -152,21 +152,25 @@ def mirror_threads_to_lemmy(
                 else thread["title"]
             )
 
-            try:
-                lemmy.post.create(
-                    community_id=community_id,
-                    name=thread_title,
-                    url=thread["url"],
-                    nsfw=None,
-                    body=post_body,
-                    language_id=LanguageType.EN,
-                )
-                posted = True
+            # only mirror posts with links
+            thread_url = thread["url"]
 
-            except Exception as e:
-                logging.error(
-                    f"Lemmy cound not create a post for thread {thread['reddit_id']}. Exception {e}."
-                )
+            if thread_url:
+                try:
+                    lemmy.post.create(
+                        community_id=community_id,
+                        name=thread_title,
+                        url=thread_url,
+                        nsfw=None,
+                        body=post_body,
+                        language_id=LanguageType.EN,
+                    )
+                    posted = True
+
+                except Exception as e:
+                    logging.error(
+                        f"Lemmy cound not create a post for thread {thread['reddit_id']}. Exception {e}."
+                    )
 
             if posted:
                 num_mirrored_posts += 1
