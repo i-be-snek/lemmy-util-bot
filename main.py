@@ -47,7 +47,7 @@ if __name__ == "__main__":
     DB = TinyDB("data/db.json")
 
     # if threads exist, authenticate with lemmy and mirror threads
-    schedule.every(30).seconds.do(mirror, reddit=reddit, database=DB, limit=10)
+    schedule.every(10).seconds.do(mirror, reddit=reddit, database=DB, limit=50)
     logging.info(
         f"Scheduler started"
     )
