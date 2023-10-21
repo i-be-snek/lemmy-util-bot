@@ -50,11 +50,12 @@ if __name__ == "__main__":
     filestack.get_backup(
         app_secret=config.FILESTACK_APP_SECRET,
         token=config.FILESTACK_API_KEY,
-        handle=config.FILETSACK_HANDLE
+        handle=config.FILESTACK_HANDLE_REFRESH,
     )
+    def raiseError(e): raise e
 
-    # confirm the file exists
-    assert os.path.exists(database_path)
+    # confirm the file has been downloaded
+    assert os.path.exists(database_path) or raiseError(FileNotFoundError)
 
     # initialize database
     database = TinyDB(database_path)
@@ -66,23 +67,20 @@ if __name__ == "__main__":
     schedule.every(60).seconds.do(mirror, reddit=reddit, database=database, limit=30)
     logging.info(f"Scheduler started")
 
-    # back the database up every 5 minutes
+    # refresh the database file in filestack
     schedule.every(5).minutes.do(
         filestack.refresh_backup,
-            app_secret=config.FILESTACK_APP_SECRET,
-            token=config.FILESTACK_API_KEY,
-            handle=config.FILETSACK_HANDLE,
-    )
-
-    schedule.every(3).days.do(filestack._upload_backup,
-            app_secret=config.FILESTACK_APP_SECRET,
-            token=config.FILESTACK_API_KEY,
-            solid_copy=True
-    )
-
-    schedule.every(15).days.do(filestack.delete_old_solid_copies,
         app_secret=config.FILESTACK_APP_SECRET,
-        max=5
+        token=config.FILESTACK_API_KEY,
+        handle=config.FILESTACK_HANDLE_REFRESH,
+    )
+
+    # refresh the database backup in filestack
+    schedule.every(12).hours.do(
+        filestack.refresh_backup,
+        app_secret=config.FILESTACK_APP_SECRET,
+        token=config.FILESTACK_API_KEY,
+        handle=config.FILESTACK_HANDLE_BACKUP,
     )
 
     # start scheduler

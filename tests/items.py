@@ -26,7 +26,8 @@ full_config = OrderedDict(
         "REDDIT_SUBREDDIT": "all",
         "FILESTACK_API_KEY": "A6i4yasdRR0mJadJp0o8jdWA",
         "FILESTACK_APP_SECRET": "2XTBUKJHHRFUN6KC62UV5MPY5Y",
-        "FILESTACK_HANDLE": "LIbC0wBfsAzs62QadcDrZ",
+        "FILESTACK_HANDLE_REFRESH": "LIbC0wBfsAzs62QadcDrZ",
+        "FILESTACK_HANDLE_BACKUP": "GAbC0wsdfDacYQadaS",
     }
 )
 thread = {
