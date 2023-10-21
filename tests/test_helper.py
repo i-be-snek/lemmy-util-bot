@@ -6,7 +6,6 @@ from filestack import Client, Filelink
 from filestack.exceptions import FilestackHTTPError
 
 from src.helper import Config, DataBase, FileDownloadError, FileUploadError
-# from tests.items import full_config, config_missing_keys
 from tests import items
 
 
