@@ -6,7 +6,6 @@ RUN mkdir src tests data
 COPY main.py poetry.lock pyproject.toml .env /
 COPY tests/* tests
 COPY src/* src
-COPY data/* data
 
 RUN poetry config virtualenvs.create false && poetry install --only=main,test --no-interaction --no-ansi
 RUN poetry run pytest tests/

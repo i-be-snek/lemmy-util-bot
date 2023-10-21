@@ -69,14 +69,6 @@ class FileDownloadError(Exception):
 class DataBase:
     db_path: str = "data/mirrored_threads.json"
 
-    policy: Dict[str, int] = field(
-        default_factory=lambda: {
-            "expiry": int(
-                (datetime.datetime.now() + datetime.timedelta(minutes=15)).timestamp()
-            )
-        }
-    )
-
     store_params: Dict[str, str] = field(
         default_factory=lambda: {
             "filename": "mirrored_threads.json",
@@ -85,17 +77,48 @@ class DataBase:
         }
     )
 
-    def _upload_backup(self, app_secret: str, token: str):
-        security = Security(self.policy, app_secret)
+    store_params_solid_backup: Dict[str, str] = field(
+        default_factory=lambda: {
+            "access": "private",
+            "upload_tags": {"backup": str(True)},
+        }
+    )
+
+    solid_copies = []
+
+    @staticmethod
+    def refresh_policy():
+        return {
+            "expiry": int(
+                (datetime.datetime.now() + datetime.timedelta(minutes=15)).timestamp()
+            )
+        }
+
+    def _upload_backup(self, app_secret: str, token: str, solid_copy=False):
+        security = Security(self.refresh_policy(), app_secret)
         client = Client(token, security=security)
-        file = client.upload(filepath=self.db_path, store_params=self.store_params)
+        if not solid_copy:
+            file = client.upload(filepath=self.db_path, store_params=self.store_params)
+        elif solid_copy:
+            file = client.upload(
+                filepath=self.db_path,
+                store_params=self.store_params_solid_backup
+                | {
+                    "filename": f"mirrored_threads_{datetime.datetime.now().isoformat()}.json"
+                },
+            )
+
         if not (file is None):
-            logging.info(f"Uploading file to {file.url} with handle {file.handle}")
+            logging.info(
+                f"Uploading file to {file.url} with handle {file.handle}. Solid copy? {solid_copy}"
+            )
+            if solid_copy:
+                self.solid_copies.append(file)
         else:
             raise FileUploadError("Upload to filestack failed.")
 
     def get_backup(self, app_secret: str, token: str, handle: str):
-        security = Security(self.policy, app_secret)
+        security = Security(self.refresh_policy(), app_secret)
         client = Client(token, security=security)
         filelink = Filelink(handle=handle, security=security)
         d = filelink.download(self.db_path)
@@ -107,7 +130,7 @@ class DataBase:
             raise FileDownloadError("Pulling backup from filestack failed")
 
     def refresh_backup(self, app_secret: str, token: str, handle: str):
-        security = Security(self.policy, app_secret)
+        security = Security(self.refresh_policy(), app_secret)
         client = Client(token, security=security)
         filelink = Filelink(handle=handle, security=security)
         o = filelink.overwrite(filepath=self.db_path, security=security)
@@ -117,3 +140,16 @@ class DataBase:
             raise FileUploadError(
                 "Overwriting the database file from filestack failed."
             )
+
+    def delete_old_solid_copies(self, app_secret: str, max: int = 10):
+        security = Security(self.refresh_policy(), app_secret)
+        logging.info("Checking solid compies to erase old ones...")
+        print(self.solid_copies)
+        if len(self.solid_copies) > max:
+            for c in range(0, len(self.solid_copies) - max):
+                self.solid_copies[c].delete(security=security)
+                logging.info(
+                    f"Erased {self.solid_copies[c].handle} from filestack server."
+                )
+        else:
+            logging.info(f"Number of solid copies is still under {max}.")
