@@ -12,7 +12,7 @@ config_missing_keys = OrderedDict(
     }
 )
 
-config = OrderedDict(
+full_config = OrderedDict(
     {
         "LEMMY_USERNAME": "MagnificentPotato",
         "LEMMY_PASSWORD": "test_password",
@@ -24,9 +24,11 @@ config = OrderedDict(
         "REDDIT_USERNAME": "BurntSublime31",
         "REDDIT_PASSWORD": "test_password",
         "REDDIT_SUBREDDIT": "all",
+        "FILESTACK_API_KEY": "A6i4yasdRR0mJadJp0o8jdWA",
+        "FILESTACK_APP_SECRET": "2XTBUKJHHRFUN6KC62UV5MPY5Y",
+        "FILESTACK_HANDLE": "LIbC0wBfsAzs62QadcDrZ",
     }
 )
-
 thread = {
     "url": "https://example.com/some_page",
     "url_attr": "https://example.com/some_page",
