@@ -1,4 +1,5 @@
 import logging
+from time import sleep
 from typing import List, Union
 from unittest import mock
 
@@ -9,7 +10,6 @@ from praw.reddit import Submission
 from pythorhead import Lemmy
 from pythorhead.types import LanguageType
 from tinydb import Query, TinyDB
-from time import sleep
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(message)s",
@@ -40,20 +40,19 @@ def _insert_thread_into_db(thread: dict, DB: TinyDB) -> None:
 def _extract_threads_to_mirror(listing: ListingGenerator, DB: TinyDB) -> List[dict]:
     threads_to_mirror = []
     for i in listing:
-        print(i.title)
         reddit_id: str = _getattr_mod(i, "name")
+
+        logging.info(f"Checking post {reddit_id}...")
+
         is_mirrored = True if _check_thread_in_db(reddit_id, DB) else False
         is_pinned: bool = False if _getattr_mod(i, "sitckied") == None else True
         is_nsfw: bool = _getattr_mod(i, "over_18")
         is_poll: bool = True if _getattr_mod(i, "poll_data") else False
         is_locked: bool = _getattr_mod(i, "locked")
 
-        logging.info(f"Checking post {reddit_id}...")
-
         if is_pinned or is_nsfw or is_poll or is_locked or is_mirrored:
             logging.info(
-                f"""Ignoring submission {i.name} with title {i.title}; is_pinned: {is_pinned};\n
-                is_nsfw: {is_nsfw}; is_poll: {is_poll}; is_locked: {is_locked}; is_mirrored --> {is_mirrored}
+                f"""Ignoring submission {i.name} with title {i.title}; is_pinned: {is_pinned}; is_nsfw: {is_nsfw}; is_poll: {is_poll}; is_locked: {is_locked}; is_mirrored --> {is_mirrored}
             """.replace(
                     "\n", " "
                 )
