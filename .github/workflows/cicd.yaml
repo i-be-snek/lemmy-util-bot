@@ -37,6 +37,8 @@ jobs:
     #  with:
     #    secrets: ${{ toJSON(secrets) }}
     #    file: .env
+    - name: Checkout repository
+      uses: actions/checkout@v2
     - name: Generate dotenv file
       uses: shine1594/secrets-to-env-action@master
       with:
@@ -53,8 +55,6 @@ jobs:
         repo: ${{ github.repository }}
         ref: ${{ github.ref }}
         path: "."
-    - name: Checkout repository
-      uses: actions/checkout@v2
     - name: Build image
       run: docker build -t registry.digitalocean.com/reddit-lemmy-mirror-bot/mirror-script:latest .
     - name: Install doctl
