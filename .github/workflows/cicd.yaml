@@ -40,7 +40,7 @@ jobs:
     - name: Check dotenv file
       run: echo "$PWD"
     - name: List files
-      run: find $1 -depth 1 -type file
+      run: echo $(find $1 -depth 1 -type file)
       working-directory: ..
     - name: Checkout repository
       uses: actions/checkout@v2
