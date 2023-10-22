@@ -52,7 +52,7 @@ jobs:
     - name: Save Docker image
       run: docker save --output image.tar ${DO_image}
     - name: Temporarily save Docker image
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: docker-artifact
         path: image.tar
@@ -67,10 +67,9 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
     - name: Retrieve saved Docker image
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: docker-artifact
-        path: image.tar
         if-no-files-found: error
     - name: Load Docker image
       run: docker load --input image.tar
