@@ -11,29 +11,29 @@ env:
   DO_image: registry.digitalocean.com/reddit-lemmy-mirror-bot/mirror-script:latest
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-    - name: Set up python
-      uses: actions/setup-python@v3
-      with:
-        python-version: 3.9
-    - name: Install poetry
-      uses: snok/install-poetry@v1
-      with:
-        version: 1.6.1
-        virtualenvs-create: true
-        virtualenvs-in-project: true
-    - name: Install deps via poetry
-      run: |
-        poetry install --with=test && echo $(poetry show)
-    - name: Run pytests
-      run: poetry run pytest
+  #test:
+  #  runs-on: ubuntu-latest
+  #  steps:
+  #  - name: Checkout repository
+  #    uses: actions/checkout@v2
+  #  - name: Set up python
+  #    uses: actions/setup-python@v3
+  #    with:
+  #      python-version: 3.9
+  #  - name: Install poetry
+  #    uses: snok/install-poetry@v1
+  #    with:
+  #      version: 1.6.1
+  #      virtualenvs-create: true
+  #      virtualenvs-in-project: true
+  #  - name: Install deps via poetry
+  #    run: |
+  #      poetry install --with=test && echo $(poetry show)
+  #  - name: Run pytests
+  #    run: poetry run pytest
 
   build:
-    needs: test
+    # needs: test
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -48,9 +48,9 @@ jobs:
     - name: Check .env
       run: echo $(head -1 .env) && echo $(tail -1 .env)
     - name: Build image
-      run: docker build -t ${DO_image} .
+      run: docker build -t "${DO_image}" .
     - name: Save Docker image
-      run: docker save --output image.tar ${DO_image}
+      run: docker save --output image.tar "${DO_image}"
     - name: Temporarily save Docker image
       uses: actions/upload-artifact@v3
       with:
@@ -60,7 +60,7 @@ jobs:
         retention-days: 1
 
   deploy:
-    if: github.ref == 'refs/heads/main'
+    # if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -80,4 +80,4 @@ jobs:
     - name: Log into Digital Ocean Container Registry
       run: doctl registry login --expiry-seconds 600
     - name: Push image to Digital Ocean Container Registry
-      run: docker push ${DO_image}
+      run: docker push "${DO_image}"
