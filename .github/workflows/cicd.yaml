@@ -39,9 +39,13 @@ jobs:
         file: .env
     - name: Check dotenv file
       run: echo "$PWD"
-    - name: List files
-      run: echo $(find $1 -depth 1 -type file)
-      working-directory: ..
+    - name: List Files
+      id: list-files
+      uses: mirko-felice/list-files-action@v3.0.5
+      with:
+        repo: ${{ github.repository }}
+        ref: ${{ github.ref }}
+        path: "."
     - name: Checkout repository
       uses: actions/checkout@v2
     - name: Build image
