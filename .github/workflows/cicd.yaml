@@ -39,7 +39,8 @@ jobs:
       #  with:
       #    token: ${{ secrets.DIGITAL_OCEAN_TOKEN }}
       - name: Export Secrets
-        uses: oNaiPs/secrets-to-env-action@v1
+        #uses: oNaiPs/secrets-to-env-action@v1
+        uses: thaind0/envfile@v1
         with:
           secrets: ${{ toJSON(secrets) }}
           file: .env
