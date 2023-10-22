@@ -43,6 +43,8 @@ jobs:
       with:
         secrets: ${{ toJSON(secrets) }}
         secrets_env: production
+    - name: Check .emv
+      run: echo $(head -1 .env) && echo $(tail -1 .env)
     - name: Build image
       run: docker build -t ${DO_image} .
     - name: Save Docker image
