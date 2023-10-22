@@ -36,7 +36,7 @@ jobs:
       uses: thaind0/envfile@v1
       with:
         secrets: ${{ toJSON(secrets) }}
-        file: .env
+        file: ./.env
     - name: Check dotenv file
       run: echo "$PWD"
     - name: List Files
