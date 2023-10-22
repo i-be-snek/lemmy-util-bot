@@ -49,7 +49,3 @@ jobs:
       run: doctl registry login --expiry-seconds 600
     - name: Push image to Digital Ocean Container Registry
       run: docker push registry.digitalocean.com/reddit-lemmy-mirror-bot/mirror-script:latest
-
-    - name: Show secret
-      run: |
-        echo $(sed -n 1p .env)
