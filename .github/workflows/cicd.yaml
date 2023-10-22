@@ -34,10 +34,16 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Build image
+        run: docker build -t registry.digitalocean.com/reddit-lemmy-mirror-bot/mirror-script:latest .
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DIGITAL_OCEAN_TOKEN }}
+      - name: Log into Digital Ocean Container Registry
+        run: doctl registry login --expiry-seconds 600
+      - name: Push image to Digital Ocean Container Registry
+        run: docker push registry.digitalocean.com/reddit-lemmy-mirror-bot/mirror-script:latest
       - name: Export Secrets
         uses: thaind0/envfile@v1
         with:
