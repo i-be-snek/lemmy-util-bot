@@ -2,53 +2,54 @@ name: Mirror Bot CI
 on:
   push:
     branches:
-      - main
+    - main
   pull_request:
     branches:
-      - main
+    - main
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: Set up python
-        uses: actions/setup-python@v3
-        with:
-          python-version: 3.9
-      - name: Install poetry
-        uses: snok/install-poetry@v1
-        with:
-          version: 1.6.1
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-      - name: Install deps via poetry
-        run: |
-          poetry install --with=test && echo $(poetry show)
-      - name: Run pytests
-        run: poetry run pytest
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Set up python
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.9
+    - name: Install poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: 1.6.1
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+    - name: Install deps via poetry
+      run: |
+        poetry install --with=test && echo $(poetry show)
+    - name: Run pytests
+      run: poetry run pytest
 
   push_to_registry:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: Build image
-        run: docker build -t registry.digitalocean.com/reddit-lemmy-mirror-bot/mirror-script:latest .
-      - name: Install doctl
-        uses: digitalocean/action-doctl@v2
-        with:
-          token: ${{ secrets.DIGITAL_OCEAN_TOKEN }}
-      - name: Log into Digital Ocean Container Registry
-        run: doctl registry login --expiry-seconds 600
-      - name: Push image to Digital Ocean Container Registry
-        run: docker push registry.digitalocean.com/reddit-lemmy-mirror-bot/mirror-script:latest
-      - name: Export Secrets
-        uses: thaind0/envfile@v1
-        with:
-          secrets: ${{ toJSON(secrets) }}
-          file: .env
-      - name: Show secret
-        run: |
-          echo $(sed -n 1p .env)
+    - name: Export Secrets
+      uses: thaind0/envfile@v1
+      with:
+        secrets: ${{ toJSON(secrets) }}
+        file: .env
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Build image
+      run: docker build -t registry.digitalocean.com/reddit-lemmy-mirror-bot/mirror-script:latest .
+    - name: Install doctl
+      uses: digitalocean/action-doctl@v2
+      with:
+        token: ${{ secrets.DIGITAL_OCEAN_TOKEN }}
+    - name: Log into Digital Ocean Container Registry
+      run: doctl registry login --expiry-seconds 600
+    - name: Push image to Digital Ocean Container Registry
+      run: docker push registry.digitalocean.com/reddit-lemmy-mirror-bot/mirror-script:latest
+
+    - name: Show secret
+      run: |
+        echo $(sed -n 1p .env)
