@@ -37,6 +37,8 @@ jobs:
       with:
         secrets: ${{ toJSON(secrets) }}
         file: .env
+    - name: Check dotenv file
+      run: echo $(ls)
     - name: Checkout repository
       uses: actions/checkout@v2
     - name: Build image
