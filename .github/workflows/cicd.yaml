@@ -39,8 +39,7 @@ jobs:
         file: .env
     - name: Check dotenv file
       run: echo $(ls) && echo $(pwd)
-    - name: Check dotenv file in previous path
-      run: cd .. && echo $(pwd) && echo $(ls)
+      working-directory: .
     - name: Checkout repository
       uses: actions/checkout@v2
     - name: Build image
