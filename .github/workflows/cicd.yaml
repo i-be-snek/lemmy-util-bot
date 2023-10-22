@@ -47,6 +47,8 @@ jobs:
       run: echo "${{ secrets.PROD_FULL_ENV_FILE }}" > .env
     - name: Check .env
       run: echo $(head -1 .env) && echo $(tail -1 .env)
+    - name: Check .env via action
+      uses: the-coding-turtle/ga-file-list@v0.2
     - name: Build image
       run: docker build -t "${DO_image}" .
     - name: Save Docker image
