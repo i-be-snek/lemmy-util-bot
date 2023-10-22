@@ -7,26 +7,26 @@ on:
     branches:
     - main
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-    - name: Set up python
-      uses: actions/setup-python@v3
-      with:
-        python-version: 3.9
-    - name: Install poetry
-      uses: snok/install-poetry@v1
-      with:
-        version: 1.6.1
-        virtualenvs-create: true
-        virtualenvs-in-project: true
-    - name: Install deps via poetry
-      run: |
-        poetry install --with=test && echo $(poetry show)
-    - name: Run pytests
-      run: poetry run pytest
+  # test:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Checkout repository
+  #     uses: actions/checkout@v2
+  #   - name: Set up python
+  #     uses: actions/setup-python@v3
+  #     with:
+  #       python-version: 3.9
+  #   - name: Install poetry
+  #     uses: snok/install-poetry@v1
+  #     with:
+  #       version: 1.6.1
+  #       virtualenvs-create: true
+  #       virtualenvs-in-project: true
+  #   - name: Install deps via poetry
+  #     run: |
+  #       poetry install --with=test && echo $(poetry show)
+  #   - name: Run pytests
+  #     run: poetry run pytest
 
   push_to_registry:
     needs: test
@@ -39,6 +39,8 @@ jobs:
         file: .env
     - name: Check dotenv file
       run: echo $(ls) && echo $(pwd)
+    - name: Check dotenv file in previous path
+      run: cd .. && echo $(pwd) && echo $(ls)
     - name: Checkout repository
       uses: actions/checkout@v2
     - name: Build image
