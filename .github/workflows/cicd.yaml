@@ -42,6 +42,8 @@ jobs:
       with:
         secrets: ${{ toJSON(secrets) }}
         secrets_env: production
+    - name: Test creating Files
+      run: echo 'This is a test' > data.txt
     - name: Check dotenv file
       run: echo "$PWD"
     - name: List Files
