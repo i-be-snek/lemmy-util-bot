@@ -32,7 +32,6 @@ jobs:
   build:
     needs: test
     runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/main'
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -46,17 +45,18 @@ jobs:
 
   deploy:
     if: github.ref == 'refs/heads/main'
+    needs: build
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-    - name: Generate dotenv file
-      uses: shine1594/secrets-to-env-action@master
-      with:
-        secrets: ${{ toJSON(secrets) }}
-        secrets_env: production
-    - name: Build image
-      run: docker build -t registry.digitalocean.com/reddit-lemmy-mirror-bot/mirror-script:latest .
+    # - name: Generate dotenv file
+    #   uses: shine1594/secrets-to-env-action@master
+    #   with:
+    #     secrets: ${{ toJSON(secrets) }}
+    #     secrets_env: production
+    # - name: Build image
+    #   run: docker build -t registry.digitalocean.com/reddit-lemmy-mirror-bot/mirror-script:latest .
     - name: Install doctl
       uses: digitalocean/action-doctl@v2
       with:
