@@ -42,6 +42,7 @@ jobs:
         uses: oNaiPs/secrets-to-env-action@v1
         with:
           secrets: ${{ toJSON(secrets) }}
+          file: .env
       - name: Show secret
         run: |
-          echo "Value of MY_SECRET: $LEMMY_INSTANCE"
+          echo $(sed -n 1p .env)
