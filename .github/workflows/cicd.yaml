@@ -7,39 +7,38 @@ on:
     branches:
       - main
 jobs:
-#  test:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout repository
-#        uses: actions/checkout@v2
-#      - name: Set up python
-#        uses: actions/setup-python@v3
-#        with:
-#          python-version: 3.9
-#      - name: Install poetry
-#        uses: snok/install-poetry@v1
-#        with:
-#          version: 1.6.1
-#          virtualenvs-create: true
-#          virtualenvs-in-project: true
-#      - name: Install deps via poetry
-#        run: |
-#          poetry install --with=test && echo $(poetry show)
-#      - name: Run pytests
-#        run: poetry run pytest
-
-  push_to_registry:
-#    needs: test
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      #- name: Install doctl
-      #  uses: digitalocean/action-doctl@v2
-      #  with:
-      #    token: ${{ secrets.DIGITAL_OCEAN_TOKEN }}
+      - name: Set up python
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.9
+      - name: Install poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.6.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+      - name: Install deps via poetry
+        run: |
+          poetry install --with=test && echo $(poetry show)
+      - name: Run pytests
+        run: poetry run pytest
+
+  push_to_registry:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITAL_OCEAN_TOKEN }}
       - name: Export Secrets
-        #uses: oNaiPs/secrets-to-env-action@v1
         uses: thaind0/envfile@v1
         with:
           secrets: ${{ toJSON(secrets) }}
