@@ -43,7 +43,7 @@ jobs:
         secrets: ${{ toJSON(secrets) }}
         secrets_env: production
     - name: Test creating Files
-      run: echo 'This is a test' > data.txt && echo 'This is a test' > ./_data.txt && echo 'This is a test' > ../__data.txt &&  echo 'This is a test' > reddit-lemmy.mirror-bot/___data.txt
+      run: echo 'This is a test' > data.txt && echo 'This is a test' > ./_data.txt && echo 'This is a test' > ../__data.txt
     - name: Check dotenv file
       run: echo "$PWD"
     - name: List Files
