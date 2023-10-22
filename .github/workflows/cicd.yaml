@@ -6,37 +6,34 @@ on:
   pull_request:
     branches:
     - main
-jobs:
-  # test:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - name: Checkout repository
-  #     uses: actions/checkout@v2
-  #   - name: Set up python
-  #     uses: actions/setup-python@v3
-  #     with:
-  #       python-version: 3.9
-  #   - name: Install poetry
-  #     uses: snok/install-poetry@v1
-  #     with:
-  #       version: 1.6.1
-  #       virtualenvs-create: true
-  #       virtualenvs-in-project: true
-  #   - name: Install deps via poetry
-  #     run: |
-  #       poetry install --with=test && echo $(poetry show)
-  #   - name: Run pytests
-  #     run: poetry run pytest
 
-  push_to_registry:
-    #needs: test
+jobs:
+  test:
     runs-on: ubuntu-latest
     steps:
-    #- name: Export Secrets
-    #  uses: thaind0/envfile@v1
-    #  with:
-    #    secrets: ${{ toJSON(secrets) }}
-    #    file: .env
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Set up python
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.9
+    - name: Install poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: 1.6.1
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+    - name: Install deps via poetry
+      run: |
+        poetry install --with=test && echo $(poetry show)
+    - name: Run pytests
+      run: poetry run pytest
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/main'
+    steps:
     - name: Checkout repository
       uses: actions/checkout@v2
     - name: Generate dotenv file
@@ -44,17 +41,20 @@ jobs:
       with:
         secrets: ${{ toJSON(secrets) }}
         secrets_env: production
-    - name: Test creating Files
-      run: echo 'This is a test' > data.txt && echo 'This is a test' > ./_data.txt && echo 'This is a test' > ../__data.txt
-    - name: Check dotenv file
-      run: echo "$PWD"
-    #- name: List Files
-    #  id: list-files
-    #  uses: mirko-felice/list-files-action@v3.0.5
-    #  with:
-    #    repo: ${{ github.repository }}
-    #    ref: ${{ github.ref }}
-    #    path: "."
+    - name: Build image
+      run: docker build -t registry.digitalocean.com/reddit-lemmy-mirror-bot/mirror-script:latest .
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Generate dotenv file
+      uses: shine1594/secrets-to-env-action@master
+      with:
+        secrets: ${{ toJSON(secrets) }}
+        secrets_env: production
     - name: Build image
       run: docker build -t registry.digitalocean.com/reddit-lemmy-mirror-bot/mirror-script:latest .
     - name: Install doctl
@@ -65,4 +65,3 @@ jobs:
       run: doctl registry login --expiry-seconds 600
     - name: Push image to Digital Ocean Container Registry
       run: docker push registry.digitalocean.com/reddit-lemmy-mirror-bot/mirror-script:latest
-
