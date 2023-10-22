@@ -50,21 +50,21 @@ jobs:
     - name: Make envfile
       uses: SpicyPizza/create-envfile@v2.0
       with:
-        LEMMY_USERNAME: ${{ secrets.LEMMY_USERNAME }}
-        LEMMY_PASSWORD: ${{ secrets.LEMMY_PASSWORD }}
-        LEMMY_INSTANCE: ${{ secrets.LEMMY_INSTANCE }}
-        LEMMY_COMMUNITY: ${{ secrets.LEMMY_COMMUNITY }}
-        REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
-        REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
-        REDDIT_PASSWORD: ${{ secrets.REDDIT_PASSWORD }}
-        REDDIT_USER_AGENT: ${{ secrets.REDDIT_USER_AGENT }}
-        REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}
-        REDDIT_SUBREDDIT: ${{ secrets.REDDIT_SUBREDDIT }}
-        DIGITAL_OCEAN_TOKEN: ${{ secrets.DIGITAL_OCEAN_TOKEN }}
-        FILESTACK_API_KEY: ${{ secrets.FILESTACK_API_KEY }}
-        FILESTACK_APP_SECRET: ${{ secrets.FILESTACK_APP_SECRET }}
-        FILESTACK_HANDLE_REFRESH: ${{ secrets.FILESTACK_HANDLE_REFRESH }}
-        FILESTACK_HANDLE_BACKUP: ${{ secrets.FILESTACK_HANDLE_BACKUP }}
+        envkey_LEMMY_USERNAME: ${{ secrets.LEMMY_USERNAME }}
+        envkey_LEMMY_PASSWORD: ${{ secrets.LEMMY_PASSWORD }}
+        envkey_LEMMY_INSTANCE: ${{ secrets.LEMMY_INSTANCE }}
+        envkey_LEMMY_COMMUNITY: ${{ secrets.LEMMY_COMMUNITY }}
+        envkey_REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+        envkey_REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+        envkey_REDDIT_PASSWORD: ${{ secrets.REDDIT_PASSWORD }}
+        envkey_REDDIT_USER_AGENT: ${{ secrets.REDDIT_USER_AGENT }}
+        envkey_REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}
+        envkey_REDDIT_SUBREDDIT: ${{ secrets.REDDIT_SUBREDDIT }}
+        envkey_DIGITAL_OCEAN_TOKEN: ${{ secrets.DIGITAL_OCEAN_TOKEN }}
+        envkey_FILESTACK_API_KEY: ${{ secrets.FILESTACK_API_KEY }}
+        envkey_FILESTACK_APP_SECRET: ${{ secrets.FILESTACK_APP_SECRET }}
+        envkey_FILESTACK_HANDLE_REFRESH: ${{ secrets.FILESTACK_HANDLE_REFRESH }}
+        envkey_FILESTACK_HANDLE_BACKUP: ${{ secrets.FILESTACK_HANDLE_BACKUP }}
         file_name: .env
         fail_on_empty: true
         sort_keys: false
