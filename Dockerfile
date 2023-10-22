@@ -9,4 +9,6 @@ COPY src/* src
 
 RUN poetry config virtualenvs.create false && poetry install --only=main,test --no-interaction --no-ansi
 RUN poetry run pytest tests/
+
+EXPOSE 80
 CMD ["poetry", "run", "python3", "main.py"]
