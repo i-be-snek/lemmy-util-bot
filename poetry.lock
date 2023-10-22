@@ -437,6 +437,21 @@ files = [
 tests = ["asttokens (>=2.1.0)", "coverage", "coverage-enable-subprocess", "ipython", "littleutils", "pytest", "rich"]
 
 [[package]]
+name = "filestack-python"
+version = "3.5.0"
+description = "Filestack Python SDK"
+optional = false
+python-versions = "*"
+files = [
+    {file = "filestack-python-3.5.0.tar.gz", hash = "sha256:a7ee71b0a6b3e233eafe0eab9e96463bc1b339df1fdc697fdc376dffc0c80468"},
+    {file = "filestack_python-3.5.0-py3-none-any.whl", hash = "sha256:c4dd43ffd1f4b1172d96b41a5a250e0c050573bb0abb94720965972f2d85bcb8"},
+]
+
+[package.dependencies]
+requests = ">=2.25.1"
+trafaret = "2.0.2"
+
+[[package]]
 name = "idna"
 version = "3.4"
 description = "Internationalized Domain Names in Applications (IDNA)"
@@ -1122,6 +1137,17 @@ socks = ["PySocks (>=1.5.6,!=1.5.7)"]
 use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
 
 [[package]]
+name = "schedule"
+version = "1.2.1"
+description = "Job scheduling for humans."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "schedule-1.2.1-py2.py3-none-any.whl", hash = "sha256:14cdeb083a596aa1de6dc77639a1b2ac8bf6eaafa82b1c9279d3612823063d01"},
+    {file = "schedule-1.2.1.tar.gz", hash = "sha256:843bc0538b99c93f02b8b50e3e39886c06f2d003b24f48e1aa4cadfa3f341279"},
+]
+
+[[package]]
 name = "six"
 version = "1.16.0"
 description = "Python 2 and 3 compatibility utilities"
@@ -1192,6 +1218,21 @@ files = [
     {file = "tornado-6.3.3-cp38-abi3-win_amd64.whl", hash = "sha256:22d3c2fa10b5793da13c807e6fc38ff49a4f6e1e3868b0a6f4164768bb8e20f5"},
     {file = "tornado-6.3.3.tar.gz", hash = "sha256:e7d8db41c0181c80d76c982aacc442c0783a2c54d6400fe028954201a2e032fe"},
 ]
+
+[[package]]
+name = "trafaret"
+version = "2.0.2"
+description = "Validation and parsing library"
+optional = false
+python-versions = "*"
+files = [
+    {file = "trafaret-2.0.2-py3-none-any.whl", hash = "sha256:5d560577cb7f5ec015cdb9298e46ec07fd9e0224bc0aaecc7d0fa0e92ea251d9"},
+    {file = "trafaret-2.0.2.tar.gz", hash = "sha256:61dfc25b574f70bfdf7ee3a808ec423061811c13a10b8d3c9e11ab539b96ab65"},
+]
+
+[package.extras]
+objectid = ["pymongo (>=2.4.1)"]
+rfc3339 = ["python-dateutil (>=1.5)"]
 
 [[package]]
 name = "traitlets"
@@ -1300,4 +1341,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.12"
-content-hash = "4b020faa3fbcb825f3a3966ce47e8376ceaf144acb119d9bf0a5ccc2acdfc224"
+content-hash = "ac376833371132b1d41e7536e5402f7b2015d9d94727fa8dccd21ae3b5c1ac28"

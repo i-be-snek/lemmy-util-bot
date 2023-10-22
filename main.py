@@ -1,8 +1,10 @@
 from dotenv import dotenv_values
 from tinydb import TinyDB
+import schedule
+import os
 
 from src.auth import lemmy_auth, reddit_oauth
-from src.helper import Config
+from src.helper import Config, DataBase
 from src.mirror import get_threads_from_reddit, mirror_threads_to_lemmy
 import datetime
 import praw
@@ -15,7 +17,9 @@ logging.basicConfig(
 )
 
 
-def mirror(reddit: praw.Reddit, database: TinyDB, limit: int = 10, mirror_delay: int = 10) -> None:
+def mirror(
+    reddit: praw.Reddit, database: TinyDB, limit: int = 10, mirror_delay: int = 25
+) -> None:
     logging.info("Attempting to mirror threads")
 
     if not reddit:
@@ -31,26 +35,55 @@ def mirror(reddit: praw.Reddit, database: TinyDB, limit: int = 10, mirror_delay:
         if not lemmy:
             return
 
-        mirror_threads_to_lemmy(lemmy, threads, config.LEMMY_COMMUNITY, database, mirror_delay)
-
-    DB.close()
+        mirror_threads_to_lemmy(
+            lemmy, threads, config.LEMMY_COMMUNITY, database, mirror_delay
+        )
 
 
 if __name__ == "__main__":
-    import schedule
-
     # get config
     config = Config(dotenv_values(".env"))
 
+    # get latest backup of the database
+    database_path = "data/mirrored_threads.json"
+    filestack = DataBase(db_path=database_path)
+    filestack.get_backup(
+        app_secret=config.FILESTACK_APP_SECRET,
+        token=config.FILESTACK_API_KEY,
+        handle=config.FILESTACK_HANDLE_REFRESH,
+    )
+    def raiseError(e): raise e
+
+    # confirm the file has been downloaded
+    assert os.path.exists(database_path) or raiseError(FileNotFoundError)
+
+    # initialize database
+    database = TinyDB(database_path)
+
     # authenticate with reddit once at the beginning
     reddit = reddit_oauth(config)
-    DB = TinyDB("data/db.json")
 
     # if threads exist, authenticate with lemmy and mirror threads
-    schedule.every(10).seconds.do(mirror, reddit=reddit, database=DB, limit=50)
-    logging.info(
-        f"Scheduler started"
+    schedule.every(60).seconds.do(mirror, reddit=reddit, database=database, limit=30)
+    logging.info(f"Scheduler started")
+
+    # refresh the database file in filestack
+    schedule.every(5).minutes.do(
+        filestack.refresh_backup,
+        app_secret=config.FILESTACK_APP_SECRET,
+        token=config.FILESTACK_API_KEY,
+        handle=config.FILESTACK_HANDLE_REFRESH,
     )
 
-    while True:
-        schedule.run_pending()
+    # refresh the database backup in filestack
+    schedule.every(12).hours.do(
+        filestack.refresh_backup,
+        app_secret=config.FILESTACK_APP_SECRET,
+        token=config.FILESTACK_API_KEY,
+        handle=config.FILESTACK_HANDLE_BACKUP,
+    )
+
+    # start scheduler
+    with database:
+        while True:
+            schedule.run_pending()

@@ -9,7 +9,7 @@ from src.helper import Config
 from tests import items
 
 
-@pytest.mark.parametrize("incorrect_configs", [Config(items.config)])
+@pytest.mark.parametrize("incorrect_configs", [Config(items.full_config)])
 class TestClassAuthBadConfig:
     def test_reddit_oauth_fail(self, incorrect_configs):
         assert reddit_oauth(incorrect_configs) == None
