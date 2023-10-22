@@ -75,7 +75,9 @@ def _extract_threads_to_mirror(listing: ListingGenerator, DB: TinyDB) -> List[di
 
             is_video: bool = _getattr_mod(i, "is_video")
 
-            if url:
+            # only post threads with URL that are not a video
+            # due to v.redd.it embedding video and sound separately
+            if url and not is_video:
                 data = {
                     "url": url,
                     "url_attr": url_attr,
