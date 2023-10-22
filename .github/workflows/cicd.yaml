@@ -48,13 +48,13 @@ jobs:
       run: echo 'This is a test' > data.txt && echo 'This is a test' > ./_data.txt && echo 'This is a test' > ../__data.txt
     - name: Check dotenv file
       run: echo "$PWD"
-    - name: List Files
-      id: list-files
-      uses: mirko-felice/list-files-action@v3.0.5
-      with:
-        repo: ${{ github.repository }}
-        ref: ${{ github.ref }}
-        path: "."
+    #- name: List Files
+    #  id: list-files
+    #  uses: mirko-felice/list-files-action@v3.0.5
+    #  with:
+    #    repo: ${{ github.repository }}
+    #    ref: ${{ github.ref }}
+    #    path: "."
     - name: Build image
       run: docker build -t registry.digitalocean.com/reddit-lemmy-mirror-bot/mirror-script:latest .
     - name: Install doctl
