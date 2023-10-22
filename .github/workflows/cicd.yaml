@@ -45,11 +45,14 @@ jobs:
         secrets_env: production
     - name: Build image
       run: docker build -t ${DO_image} .
+    - name: Save Docker image
+      run: docker save --output image.tar ${DO_image}
     - name: Temporarily save Docker image
       uses: actions/upload-artifact@v2
       with:
         name: docker-artifact
-        path: ./${DO_image}
+        path: image.tar # ./${DO_image}
+        if-no-files-found: error
         retention-days: 1
 
   deploy:
@@ -63,7 +66,8 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: docker-artifact
-        path: ./${DO_image}
+        path: image.tar # ./${DO_image}
+        if-no-files-found: error
     - name: Install doctl
       uses: digitalocean/action-doctl@v2
       with:
