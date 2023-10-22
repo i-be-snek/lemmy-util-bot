@@ -9,7 +9,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -28,3 +27,20 @@ jobs:
           poetry install --with=test && echo $(poetry show)
       - name: Run pytests
         run: poetry run pytest
+
+  push_to_registry:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      #- name: Install doctl
+      #  uses: digitalocean/action-doctl@v2
+      #  with:
+      #    token: ${{ secrets.DIGITAL_OCEAN_TOKEN }}
+      - name: Export Secrets
+        uses: oNaiPs/secrets-to-env-action@v1
+        with:
+          secrets: ${{ toJSON(secrets) }}
+      - name: Show secret
+        run: |
+          echo "Value of MY_SECRET: $LEMMY_INSTANCE"
