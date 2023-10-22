@@ -68,6 +68,8 @@ jobs:
         name: docker-artifact
         path: image.tar
         if-no-files-found: error
+    - name: Load Docker image
+      run: docker load --input image.tar
     - name: Install doctl
       uses: digitalocean/action-doctl@v2
       with:
