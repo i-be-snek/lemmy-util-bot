@@ -42,6 +42,12 @@ jobs:
         secrets_env: production
     - name: Build image
       run: docker build -t registry.digitalocean.com/reddit-lemmy-mirror-bot/mirror-script:latest .
+    - name: Temporarily save Docker image
+      uses: actions/upload-artifact@v2
+      with:
+        name: docker-artifact
+        path: tmp/artifacts
+        retention-days: 1
 
   deploy:
     if: github.ref == 'refs/heads/main'
@@ -49,7 +55,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2'
+    - name: Retrieve saved Docker image
+      uses: actions/download-artifact@v2
+      with:
+        name: docker-artifact
+        path: tmp/artifacts
     # - name: Generate dotenv file
     #   uses: shine1594/secrets-to-env-action@master
     #   with:
