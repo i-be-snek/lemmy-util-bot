@@ -42,7 +42,7 @@ jobs:
       run: docker build -t "${DO_image}" .
     - name: Save Docker image
       run: docker save --output image.tar "${DO_image}"
-    - name: Temporarily save Docker image
+    - name: Upload docker image artifact
       uses: actions/upload-artifact@v3
       with:
         name: docker-artifact
@@ -57,11 +57,10 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-    - name: Retrieve saved Docker image
+    - name: Retrieve uploaded Docker image from previous build
       uses: actions/download-artifact@v3
       with:
         name: docker-artifact
-        #if-no-files-found: error
     - name: Load Docker image
       run: docker load --input image.tar
     - name: Install doctl
