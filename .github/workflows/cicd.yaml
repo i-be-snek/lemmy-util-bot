@@ -41,7 +41,7 @@ jobs:
     - name: Temporarily save dotenv file
       uses: actions/upload-artifact@v3
       with:
-        path: .
+        path: dotenv
         name: .env
         if-no-files-found: error
         retention-days: 1
@@ -71,7 +71,7 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: .env
-        path: .
+        path: dotenv
         if-no-files-found: error
     - name: Build image
       run: docker build -t "${DO_image}" .
