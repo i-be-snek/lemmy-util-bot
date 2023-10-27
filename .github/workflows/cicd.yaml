@@ -16,7 +16,7 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-    - name: Make envfile
+    - name: Make dotenv file
       uses: SpicyPizza/create-envfile@v2.0
       with:
         envkey_LEMMY_USERNAME: ${{ secrets.LEMMY_USERNAME }}
