@@ -41,6 +41,7 @@ jobs:
     - name: Temporarily save dotenv file
       uses: actions/upload-artifact@v3
       with:
+        path: .
         name: .env
         if-no-files-found: error
         retention-days: 1
