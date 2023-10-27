@@ -27,15 +27,7 @@ def mirror(
 
     threads = get_threads_from_reddit(
         reddit, config.REDDIT_SUBREDDIT, database, limit=limit,
-        ignore=[
-            Thread.mirrored,
-            Thread.pinned,
-            Thread.nsfw,
-            Thread.poll,
-            Thread.locked,
-            Thread.video,
-            Thread.url
-        ]
+        ignore=config.THREADS_TO_IGNORE
     )
 
     if threads:
