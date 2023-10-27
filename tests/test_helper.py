@@ -25,6 +25,10 @@ class TestClassHelper:
             Thread.nsfw,
         ]
 
+    def test_check_prod_configs(self):
+        from dotenv import dotenv_values
+        assert Config(dotenv_values(".env"))
+
 
 @pytest.mark.parametrize("test_filestack", [DataBase("tests/filestack_tests.txt")])
 class TestClassDataBase:
