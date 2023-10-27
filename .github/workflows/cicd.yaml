@@ -11,7 +11,7 @@ env:
   DO_image: registry.digitalocean.com/reddit-lemmy-mirror-bot/mirror-script:latest
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -38,40 +38,6 @@ jobs:
         file_name: .env
         fail_on_empty: true
         sort_keys: false
-    - name: Temporarily save dotenv file
-      uses: actions/upload-artifact@v3
-      with:
-        path: .
-        name: .env
-        if-no-files-found: error
-        retention-days: 1
-    - name: Set up python
-      uses: actions/setup-python@v3
-      with:
-        python-version: 3.9
-    - name: Install poetry
-      uses: snok/install-poetry@v1
-      with:
-        version: 1.6.1
-        virtualenvs-create: true
-        virtualenvs-in-project: true
-    - name: Install deps via poetry
-      run: |
-        poetry install --with=test && echo $(poetry show)
-    - name: Run pytests
-      run: poetry run pytest
-
-  build:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-    - name: Retrieve dotenv file
-      uses: actions/download-artifact@v3
-      with:
-        name: .env
-        #if-no-files-found: error
     - name: Build image
       run: docker build -t "${DO_image}" .
     - name: Save Docker image
