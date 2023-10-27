@@ -23,7 +23,7 @@ class Thread(Enum):
     locked: str = "locked"
     video: str = "video"
     url: str = "url"
-    flair: str = ("flair",)
+    flair: str = "flair"
     body: str = "body"
 
 
@@ -45,6 +45,7 @@ class Config:
         "FILESTACK_APP_SECRET",
         "FILESTACK_HANDLE_REFRESH",
         "FILESTACK_HANDLE_BACKUP",
+        "THREADS_TO_IGNORE",
     )
     keys_missing: bool = False
 
@@ -71,6 +72,10 @@ class Config:
             self.FILESTACK_APP_SECRET: str = self.config["FILESTACK_APP_SECRET"]
             self.FILESTACK_HANDLE_REFRESH: str = self.config["FILESTACK_HANDLE_REFRESH"]
             self.FILESTACK_HANDLE_BACKUP: str = self.config["FILESTACK_HANDLE_BACKUP"]
+            self.THREADS_TO_IGNORE: list = [
+                Thread.__getattr__(x)
+                for x in self.config["THREADS_TO_IGNORE"].split(",")
+            ]
 
 
 class FileUploadError(Exception):

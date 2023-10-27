@@ -5,7 +5,8 @@ import pytest
 from filestack import Client, Filelink
 from filestack.exceptions import FilestackHTTPError
 
-from src.helper import Config, DataBase, FileDownloadError, FileUploadError
+from src.helper import (Config, DataBase, FileDownloadError, FileUploadError,
+                        Thread)
 from tests import items
 
 
@@ -16,6 +17,13 @@ class TestClassHelper:
 
     def test_check_configs(self):
         Config(items.full_config)
+
+    def test_check_configs_ignore_list(self):
+        assert Config(items.full_config).THREADS_TO_IGNORE == [
+            Thread.mirrored,
+            Thread.pinned,
+            Thread.nsfw,
+        ]
 
 
 @pytest.mark.parametrize("test_filestack", [DataBase("tests/filestack_tests.txt")])
