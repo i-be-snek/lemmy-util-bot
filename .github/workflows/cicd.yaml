@@ -71,6 +71,7 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: .env
+        path: .
         if-no-files-found: error
     - name: Build image
       run: docker build -t "${DO_image}" .
