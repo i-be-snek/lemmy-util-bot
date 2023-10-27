@@ -4,7 +4,7 @@ import schedule
 import os
 
 from src.auth import lemmy_auth, reddit_oauth
-from src.helper import Config, DataBase
+from src.helper import Config, DataBase, Thread
 from src.mirror import get_threads_from_reddit, mirror_threads_to_lemmy
 import datetime
 import praw
@@ -26,7 +26,16 @@ def mirror(
         return
 
     threads = get_threads_from_reddit(
-        reddit, config.REDDIT_SUBREDDIT, database, limit=limit
+        reddit, config.REDDIT_SUBREDDIT, database, limit=limit,
+        ignore=[
+            Thread.mirrored,
+            Thread.pinned,
+            Thread.nsfw,
+            Thread.poll,
+            Thread.locked,
+            Thread.video,
+            Thread.url
+        ]
     )
 
     if threads:

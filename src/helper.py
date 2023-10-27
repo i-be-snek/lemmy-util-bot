@@ -1,6 +1,7 @@
 import datetime
 import logging
 from dataclasses import dataclass, field
+from enum import Enum, unique
 from typing import Dict, Union
 
 from filestack import Client, Filelink, Security
@@ -11,6 +12,19 @@ logging.basicConfig(
     level=logging.INFO,
     datefmt="%Y-%m-%d %H:%M:%S",
 )
+
+
+@unique
+class Thread(Enum):
+    mirrored: str = "mirrored"
+    pinned: str = "pinned"
+    nsfw: str = "nsfw"
+    poll: str = "poll"
+    locked: str = "locked"
+    video: str = "video"
+    url: str = "url"
+    flair: str = ("flair",)
+    body: str = "body"
 
 
 @dataclass
