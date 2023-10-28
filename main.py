@@ -50,7 +50,7 @@ if __name__ == "__main__":
     filestack = DataBase(db_path=database_path)
     filestack.get_backup(
         app_secret=config.FILESTACK_APP_SECRET,
-        token=config.FILESTACK_API_KEY,
+        apikey=config.FILESTACK_API_KEY,
         handle=config.FILESTACK_HANDLE_REFRESH,
     )
     def raiseError(e): raise e
@@ -72,7 +72,7 @@ if __name__ == "__main__":
     schedule.every(5).minutes.do(
         filestack.refresh_backup,
         app_secret=config.FILESTACK_APP_SECRET,
-        token=config.FILESTACK_API_KEY,
+        apikey=config.FILESTACK_API_KEY,
         handle=config.FILESTACK_HANDLE_REFRESH,
     )
 
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     schedule.every(12).hours.do(
         filestack.refresh_backup,
         app_secret=config.FILESTACK_APP_SECRET,
-        token=config.FILESTACK_API_KEY,
+        apikey=config.FILESTACK_API_KEY,
         handle=config.FILESTACK_HANDLE_BACKUP,
     )
 

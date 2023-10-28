@@ -105,9 +105,9 @@ class DataBase:
             )
         }
 
-    def _upload_backup(self, app_secret: str, token: str, filename: str):
+    def _upload_backup(self, app_secret: str, apikey: str, filename: str):
         security = Security(self.refresh_policy(), app_secret)
-        client = Client(token, security=security)
+        client = Client(apikey, security=security)
 
         file = client.upload(
             filepath=self.db_path,
@@ -121,9 +121,9 @@ class DataBase:
         else:
             raise FileUploadError("Upload to filestack failed.")
 
-    def get_backup(self, app_secret: str, token: str, handle: str):
+    def get_backup(self, app_secret: str, apikey: str, handle: str):
         security = Security(self.refresh_policy(), app_secret)
-        client = Client(token, security=security)
+        client = Client(apikey, security=security)
         filelink = Filelink(handle=handle, security=security)
         d = filelink.download(self.db_path)
         if not (d is None):
@@ -133,9 +133,9 @@ class DataBase:
         else:
             raise FileDownloadError("Pulling backup from filestack failed")
 
-    def refresh_backup(self, app_secret: str, token: str, handle: str):
+    def refresh_backup(self, app_secret: str, apikey: str, handle: str):
         security = Security(self.refresh_policy(), app_secret)
-        client = Client(token, security=security)
+        client = Client(apikey, security=security)
         filelink = Filelink(handle=handle, security=security)
         o = filelink.overwrite(filepath=self.db_path, security=security)
         if not (o is None):
