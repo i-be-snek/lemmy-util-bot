@@ -6,9 +6,14 @@ import pytest
 from tinydb import Query, TinyDB
 
 from src.helper import Config, Thread
-from src.mirror import (_check_thread_in_db, _extract_threads_to_mirror,
-                        _getattr_mod, _insert_thread_into_db,
-                        get_threads_from_reddit, mirror_threads_to_lemmy)
+from src.mirror import (
+    _check_thread_in_db,
+    _extract_threads_to_mirror,
+    _getattr_mod,
+    _insert_thread_into_db,
+    get_threads_from_reddit,
+    mirror_threads_to_lemmy,
+)
 from tests import items
 
 

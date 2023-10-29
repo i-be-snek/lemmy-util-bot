@@ -5,8 +5,7 @@ import pytest
 from filestack import Client, Filelink
 from filestack.exceptions import FilestackHTTPError
 
-from src.helper import (Config, DataBase, FileDownloadError, FileUploadError,
-                        Thread)
+from src.helper import Config, DataBase, FileDownloadError, FileUploadError, Thread
 from tests import items
 
 
