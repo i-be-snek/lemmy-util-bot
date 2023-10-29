@@ -105,12 +105,17 @@ class DataBase:
             )
         }
 
-    def _upload_backup(self, app_secret: str, apikey: str, filename: str):
+    def _upload_backup(
+        self, app_secret: str, apikey: str, filename: str, db_path: str = None
+    ):
+        if db_path is None:
+            db_path = self.db_path
+
         security = Security(self.refresh_policy(), app_secret)
         client = Client(apikey, security=security)
 
         file = client.upload(
-            filepath=self.db_path,
+            filepath=db_path,
             store_params=self.store_params | {"filename": filename},
         )
 
@@ -118,6 +123,7 @@ class DataBase:
             logging.info(
                 f"Uploading file {filename} to {file.url} with handle {file.handle}."
             )
+            return file
         else:
             raise FileUploadError("Upload to filestack failed.")
 
