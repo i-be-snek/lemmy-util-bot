@@ -27,6 +27,7 @@ class TestClassHelper:
 
     def test_check_prod_configs(self):
         from dotenv import dotenv_values
+
         assert Config(dotenv_values(".env"))
 
 
