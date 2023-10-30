@@ -26,8 +26,11 @@ def mirror(
         return
 
     threads = get_threads_from_reddit(
-        reddit, config.REDDIT_SUBREDDIT, database, limit=limit,
-        ignore=config.THREADS_TO_IGNORE
+        reddit,
+        config.REDDIT_SUBREDDIT,
+        database,
+        limit=limit,
+        ignore=config.THREADS_TO_IGNORE,
     )
 
     if threads:
@@ -36,14 +39,20 @@ def mirror(
         if not lemmy:
             return
 
-        mirror_threads_to_lemmy(
-            lemmy, threads, config.LEMMY_COMMUNITY, database, mirror_delay
-        )
+        # mirror_threads_to_lemmy(
+        #    lemmy, threads, config.LEMMY_COMMUNITY, database, mirror_delay
+        # )
 
 
 if __name__ == "__main__":
     # get config
     config = Config(dotenv_values(".env"))
+
+    backup_m = config.BACKUP_FILESTACK_EVERY_MINUTE
+    refresh_h = config.REFRESH_FILESTACK_EVERY_HOUR
+    mirror_s = config.MIRROR_THREADS_EVERY_SECOND
+    mirror_delay_s = config.DELAY_BETWEEN_MIRRORED_THREADS_SECOND
+    filter_limit = config.REDDIT_FILTER_THREAD_LIMIT
 
     # get latest backup of the database
     database_path = "data/mirrored_threads.json"
@@ -53,7 +62,9 @@ if __name__ == "__main__":
         apikey=config.FILESTACK_API_KEY,
         handle=config.FILESTACK_HANDLE_REFRESH,
     )
-    def raiseError(e): raise e
+
+    def raiseError(e):
+        raise e
 
     # confirm the file has been downloaded
     assert os.path.exists(database_path) or raiseError(FileNotFoundError)
@@ -65,11 +76,17 @@ if __name__ == "__main__":
     reddit = reddit_oauth(config)
 
     # if threads exist, authenticate with lemmy and mirror threads
-    schedule.every(60).seconds.do(mirror, reddit=reddit, database=database, limit=30)
+    schedule.every(mirror_s).seconds.do(
+        mirror,
+        reddit=reddit,
+        database=database,
+        limit=filter_limit,
+        mirror_delay=mirror_delay_s,
+    )
     logging.info(f"Scheduler started")
 
     # refresh the database file in filestack
-    schedule.every(5).minutes.do(
+    schedule.every(refresh_h).minutes.do(
         filestack.refresh_backup,
         app_secret=config.FILESTACK_APP_SECRET,
         apikey=config.FILESTACK_API_KEY,
@@ -77,7 +94,7 @@ if __name__ == "__main__":
     )
 
     # refresh the database backup in filestack
-    schedule.every(12).hours.do(
+    schedule.every(refresh_h).hours.do(
         filestack.refresh_backup,
         app_secret=config.FILESTACK_APP_SECRET,
         apikey=config.FILESTACK_API_KEY,
