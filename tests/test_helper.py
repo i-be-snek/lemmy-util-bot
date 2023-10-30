@@ -7,14 +7,8 @@ from filestack import Client, Filelink
 from filestack.exceptions import FilestackHTTPError
 from tinydb import Query, TinyDB
 
-from src.helper import (
-    Config,
-    DataBase,
-    FileDownloadError,
-    FileUploadError,
-    Thread,
-    Util,
-)
+from src.helper import (Config, DataBase, FileDownloadError, FileUploadError,
+                        RedditThread, Util)
 from tests import items
 
 
@@ -28,9 +22,9 @@ class TestClassHelper:
 
     def test_check_configs_ignore_list(self):
         assert Config(items.full_config).THREADS_TO_IGNORE == [
-            Thread.mirrored,
-            Thread.pinned,
-            Thread.nsfw,
+            RedditThread.mirrored,
+            RedditThread.pinned,
+            RedditThread.nsfw,
         ]
 
     def test_check_prod_configs(self):

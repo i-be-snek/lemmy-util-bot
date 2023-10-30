@@ -6,7 +6,6 @@ from typing import Dict, Union
 
 import requests
 from filestack import Client, Filelink, Security
-from requests import get, patch
 from tinydb import Query, TinyDB
 
 logging.basicConfig(
@@ -17,7 +16,7 @@ logging.basicConfig(
 
 
 @unique
-class Thread(Enum):
+class RedditThread(Enum):
     mirrored: str = "mirrored"
     pinned: str = "pinned"
     nsfw: str = "nsfw"
@@ -57,7 +56,7 @@ class Config:
         "MIRROR_THREADS_EVERY_SECOND",
         "DELAY_BETWEEN_MIRRORED_THREADS_SECOND",
         "REDDIT_FILTER_THREAD_LIMIT",
-        "FILTER_BY"
+        "FILTER_BY",
     )
     keys_missing: bool = False
 
@@ -85,15 +84,25 @@ class Config:
             self.FILESTACK_HANDLE_REFRESH: str = self.config["FILESTACK_HANDLE_REFRESH"]
             self.FILESTACK_HANDLE_BACKUP: str = self.config["FILESTACK_HANDLE_BACKUP"]
             self.THREADS_TO_IGNORE: list = [
-                Thread.__getattr__(x)
+                RedditThread.__getattr__(x)
                 for x in self.config["THREADS_TO_IGNORE"].split(",")
             ]
 
-            self.BACKUP_FILESTACK_EVERY_HOUR: int = int(self.config.get("BACKUP_FILESTACK_EVERY_HOUR", 36))
-            self.REFRESH_FILESTACK_EVERY_MINUTE: int = int(self.config.get("REFRESH_FILESTACK_EVERY_MINUTE", 30))
-            self.MIRROR_THREADS_EVERY_SECOND: int = int(self.config.get("MIRROR_THREADS_EVERY_SECOND", 60))
-            self.DELAY_BETWEEN_MIRRORED_THREADS_SECOND: int = int(self.config.get("DELAY_BETWEEN_MIRRORED_THREADS_SECOND", 60))
-            self.REDDIT_FILTER_THREAD_LIMIT: int = int(self.config.get("REDDIT_FILTER_THREAD_LIMIT", 30))
+            self.BACKUP_FILESTACK_EVERY_HOUR: int = int(
+                self.config.get("BACKUP_FILESTACK_EVERY_HOUR", 36)
+            )
+            self.REFRESH_FILESTACK_EVERY_MINUTE: int = int(
+                self.config.get("REFRESH_FILESTACK_EVERY_MINUTE", 30)
+            )
+            self.MIRROR_THREADS_EVERY_SECOND: int = int(
+                self.config.get("MIRROR_THREADS_EVERY_SECOND", 60)
+            )
+            self.DELAY_BETWEEN_MIRRORED_THREADS_SECOND: int = int(
+                self.config.get("DELAY_BETWEEN_MIRRORED_THREADS_SECOND", 60)
+            )
+            self.REDDIT_FILTER_THREAD_LIMIT: int = int(
+                self.config.get("REDDIT_FILTER_THREAD_LIMIT", 30)
+            )
             self.FILTER_BY: str = self.config.get("FILTER_BY", "new")
 
 

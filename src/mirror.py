@@ -11,7 +11,7 @@ from pythorhead import Lemmy
 from pythorhead.types import LanguageType
 from tinydb import Query, TinyDB
 
-from src.helper import Thread, Util
+from src.helper import RedditThread, Util
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(message)s",
@@ -74,16 +74,16 @@ def _extract_threads_to_mirror(
         flair = flair.strip() if flair else None
 
         ignore_map = {
-            Thread.mirrored: is_mirrored,
-            Thread.pinned: is_pinned,
-            Thread.nsfw: is_nsfw,
-            Thread.poll: is_poll,
-            Thread.locked: is_locked,
-            Thread.video: is_video,
-            Thread.url: url,
-            Thread.flair: flair,
-            Thread.body: body,
-            Thread.image: True if image else None,
+            RedditThread.mirrored: is_mirrored,
+            RedditThread.pinned: is_pinned,
+            RedditThread.nsfw: is_nsfw,
+            RedditThread.poll: is_poll,
+            RedditThread.locked: is_locked,
+            RedditThread.video: is_video,
+            RedditThread.url: url,
+            RedditThread.flair: flair,
+            RedditThread.body: body,
+            RedditThread.image: True if image else None,
         }
 
         for t in ignore:
@@ -123,14 +123,14 @@ def get_threads_from_reddit(
     subreddit_name: str,
     DB: TinyDB,
     limit: int = 100,
-    ignore: list[Thread] = [
-        Thread.mirrored,
-        Thread.pinned,
-        Thread.nsfw,
-        Thread.poll,
-        Thread.locked,
-        Thread.video,
-        Thread.url,
+    ignore: list[RedditThread] = [
+        RedditThread.mirrored,
+        RedditThread.pinned,
+        RedditThread.nsfw,
+        RedditThread.poll,
+        RedditThread.locked,
+        RedditThread.video,
+        RedditThread.url,
     ],
     filter: str = "new",
 ) -> List[Submission]:
