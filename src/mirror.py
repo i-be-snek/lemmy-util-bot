@@ -153,11 +153,11 @@ def get_threads_from_reddit(
         logging.info(f"Grabbed a list of {filter} threads from Reddit")
 
     elif filter == "hot":
-        listing = subreddit.new(limit=limit)
+        listing = subreddit.hot(limit=limit)
         logging.info(f"Grabbed a list of {filter} threads from Reddit")
 
     elif filter == "rising":
-        listing = subreddit.new(limit=limit)
+        listing = subreddit.rising(limit=limit)
         logging.info(f"Grabbed a list of {filter} threads from Reddit")
 
     threads_to_mirror = _extract_threads_to_mirror(
