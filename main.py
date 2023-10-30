@@ -86,6 +86,8 @@ if __name__ == "__main__":
         mirror_delay=mirror_delay_s,
     )
     logging.info(f"Scheduler started")
+    logging.info(f"Mirroring every {mirror_s} seconds with a delay of {mirror_delay_s} seconds between threads; checking up to {filter_limit} threads at a time")
+    logging.info(f"Refreshing the database file every {refresh_m} minutes; creating a backup copy every {backup_h} hours")
 
     # refresh the database file in filestack
     schedule.every(refresh_m).minutes.do(
