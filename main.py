@@ -17,7 +17,11 @@ logging.basicConfig(
 
 
 def mirror(
-    reddit: praw.Reddit, database: TinyDB, filter: str, limit: int = 10, mirror_delay: int = 25,
+    reddit: praw.Reddit,
+    database: TinyDB,
+    filter: str,
+    limit: int = 10,
+    mirror_delay: int = 25,
 ) -> None:
     logging.info("Attempting to mirror threads")
 
@@ -30,7 +34,7 @@ def mirror(
         database,
         limit=limit,
         ignore=config.THREADS_TO_IGNORE,
-        filter=filter
+        filter=filter,
     )
 
     if threads:
