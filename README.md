@@ -2,8 +2,8 @@
 
 ### This is a lemmy utility bot (in the making). Supported features:
 
-- #### [Currently supported] Mirror posts from reddit to lemmy
-- #### [Upcoming] Mod comment to all new posts
+- #### [Currently supported] Mirror threads from reddit to lemmy
+- #### [Upcoming] Mod comment to all new threads
 - #### [Upcoming] Media Bias/Fact Check comment on new URL threads
 
 
@@ -12,7 +12,7 @@
 2. [Docker](https://docs.docker.com/engine/install/), version 24 or above. 
 
 
-## Deploying your own instance of the bot
+## Deploying your own instance of the bot (MIRROR)
 
 
 ### (A) Initial setup and prequisites
@@ -107,7 +107,7 @@ This is the step where you can configure your bot.
     REDDIT_SUBREDDIT="all"
     ```
 
-5. To be able to store and backup a small database with all the reddit posts the bot has already mirrored, [create a free Filestack account](https://dev.filestack.com/signup/free/). The database that keeps getting updated by the bot will be stored there so that the bot avoids cluttering lemmy with posts that have already been mirrored. It also ensures that the data is backed up somewhere.
+5. To be able to store and backup a small database with all the reddit threads the bot has already mirrored, [create a free Filestack account](https://dev.filestack.com/signup/free/). The database that keeps getting updated by the bot will be stored there so that the bot avoids cluttering lemmy with threads that have already been mirrored. It also ensures that the data is backed up somewhere.
 
     Click `COPY APIKEY` from the top right corner, this is the value for `FILESTACK_API_KEY`. To get `FILESTACK_APP_SECRET`, click on `SECURITY` > `Policy & Signature` on the left tab. Toggle on the `Use Security` option and click "show" to see your app secret.
 
@@ -159,7 +159,7 @@ This is the step where you can configure your bot.
     | image     | Ignore threads with an image url                                              | 
 
     
-    For example, to ignore NSFW, pinned, and already-mirrored posts from Reddit, type the names separated by a comma
+    For example, to ignore NSFW, pinned, and already-mirrored threads from Reddit, type the names separated by a comma
     
     ```shell
     THREADS_TO_IGNORE="mirrored,pinned,nsfw"
