@@ -5,12 +5,9 @@ import praw
 import pytest
 from tinydb import Query, TinyDB
 
-from src.helper import Config, Thread
+from src.helper import Config, Thread, Util
 from src.mirror import (
-    _check_thread_in_db,
     _extract_threads_to_mirror,
-    _getattr_mod,
-    _insert_thread_into_db,
     get_threads_from_reddit,
     mirror_threads_to_lemmy,
 )
@@ -18,14 +15,6 @@ from tests import items
 
 
 class TestClassMirror:
-    def test__check_thread_in_db(self):
-        test_db = TinyDB(items.test_db_path)
-        assert _check_thread_in_db(reddit_id="test_1234", DB=test_db) == False
-
-    def test__check_thread_in_db(self):
-        test_db = TinyDB(items.test_db_path)
-        assert _check_thread_in_db(reddit_id="test_170jhq3", DB=test_db) == True
-
     def test__extract_threads_to_mirror_no_listing(self):
         test_db = TinyDB(items.test_db_path)
         assert _extract_threads_to_mirror([], test_db) == list(dict())
@@ -116,9 +105,3 @@ class TestClassMirror:
 
         test_db.close()
         assert mirror == 1
-
-    def test__getattr_mod_success(self):
-        assert _getattr_mod(os, "__name__") == "os"
-
-    def test__getattr_mod_fail(self):
-        assert _getattr_mod(os, "non_existent_attribute") == None
