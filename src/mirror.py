@@ -61,7 +61,7 @@ def _extract_threads_to_mirror(
         )
 
         # check if the url is an image
-        image = Util._check_if_image(url) if url else None
+        image = Util._check_if_image(url) if url is not None else None
 
         # if it is, set the url to None
         url = None if image is not None else url
@@ -204,7 +204,7 @@ def mirror_threads_to_lemmy(
             image_url = thread["image_url"]
 
             # link to the url or external content
-            url = thread_url if not None else image_url
+            url = thread_url if thread_url is not None else image_url
 
             try:
                 lemmy.post.create(
