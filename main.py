@@ -48,6 +48,12 @@ def mirror(
         )
 
 
+def automod_comment_on_new_threads(config: dict):
+    lemmy = lemmy_auth(config)
+    auto_mod = AutoMod(lemmy, config.LEMMY_COMMUNITY, config.LEMMY_USERNAME)
+    auto_mod.comment_on_new_threads()
+
+
 if __name__ == "__main__":
     # get config
     config = Config(dotenv_values(".env"))
