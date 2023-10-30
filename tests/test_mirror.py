@@ -1,9 +1,9 @@
 from unittest import mock
+
 from tinydb import Query, TinyDB
 
 from src.helper import RedditThread
-from src.mirror import (_extract_threads_to_mirror,
-                        mirror_threads_to_lemmy)
+from src.mirror import _extract_threads_to_mirror, mirror_threads_to_lemmy
 from tests import items
 
 

@@ -4,9 +4,8 @@ import schedule
 import os
 
 from src.auth import lemmy_auth, reddit_oauth
-from src.helper import Config, DataBase, Thread
+from src.helper import Config, DataBase
 from src.mirror import get_threads_from_reddit, mirror_threads_to_lemmy
-import datetime
 import praw
 import logging
 

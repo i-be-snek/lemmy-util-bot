@@ -1,7 +1,6 @@
 import logging
-from typing import List
-
 from dataclasses import dataclass
+from typing import List
 
 from pythorhead.types import LanguageType, SortType
 
