@@ -147,15 +147,16 @@ This is the step where you can configure your bot.
 
     | name     | Ignores    | 
     | -------- | ---------- |
-    | mirrored | Ignores already mirrored threads added to the Filestack backup         | 
-    | pinned   | Ignores pinned (or "stickied") threads                                 | 
-    | nsfw     | Ignores NSFW threads marked as "over_18" by Reddit                     | 
-    | poll     | Ignore poll threads                                                    | 
-    | locked   | Ignore threads locked by mods                                          | 
-    | video    | Ignore threads with an uploaded video (not threads linking to a video) | 
-    | url      | Ignore threads with URL links external to Reddit                       | 
-    | flair    | Ignore threads which has a flair                                       | 
-    | body     | Ignore threads with a text body                                        | 
+    | mirrored | Ignores already mirrored threads added to the Filestack backup                 | 
+    | pinned   | Ignores pinned (or "stickied") threads                                         | 
+    | nsfw     | Ignores NSFW threads marked as "over_18" by Reddit                             | 
+    | poll     | Ignore poll threads                                                            | 
+    | locked   | Ignore threads locked by mods                                                  | 
+    | video    | Ignore threads with an uploaded video (not threads linking to a video)         | 
+    | url      | Ignore threads with URL links external to Reddit. *Does not ignore image links | 
+    | flair    | Ignore threads which has a flair                                               | 
+    | body     | Ignore threads with a text body                                                | 
+    | image     | Ignore threads with an image url                                              | 
 
     
     For example, to ignore NSFW, pinned, and already-mirrored posts from Reddit, type the names separated by a comma
@@ -164,7 +165,7 @@ This is the step where you can configure your bot.
     THREADS_TO_IGNORE="mirrored,pinned,nsfw"
     ```
 
-8. Confirm that all needed environment variables are present in `.env` by running this pythohon test:
+8. Confirm that all vital environment variables are present in `.env` by running this pythohon test:
 
     ```shell
     poetry shell pytest -k test_check_prod_configs
@@ -179,6 +180,27 @@ This is the step where you can configure your bot.
     ============================================================================================================================================================================================= short test summary info =============================================================================================================================================================================================
     FAILED tests/test_helper.py::TestClassHelper::test_check_prod_configs - AssertionError: One or more variables are missing
 
+    ```
+
+9. You configure the scheduling times by adding these to the .env file (otherwise the script falls back to its defaults):
+
+    ```shell
+    # how long to wait in hours before making a backup of the filestack database, default = 36 (hours)
+    BACKUP_FILESTACK_EVERY_HOUR=36
+
+    # how long to wait in minutes before refreshing of the filestack database,
+    # this should be done frequently default = 30 (minutes)
+    REFRESH_FILESTACK_EVERY_MINUTE=30
+
+    # schedule the mirror script to run every X seconds (to comply with the Lemmy instance rules or 
+    # avoid reposting every second, for example), default = 60 (seconds)
+    MIRROR_THREADS_EVERY_SECOND=60
+
+    # add a delay between each thread mirrored to Lemmy, default = 60 (seconds)
+    DELAY_BETWEEN_MIRRORED_THREADS_SECOND=60
+
+    # the number of new threads to consider for mirroring, default = 30 threads
+    REDDIT_FILTER_THREAD_LIMIT=30
     ```
 
 
