@@ -34,6 +34,7 @@ full_config = OrderedDict(
 thread = {
     "url": "https://example.com/some_page",
     "url_attr": "https://example.com/some_page",
+    "image_url": "https://pngimg.com/uploads/cat/cat_PNG50487.png",
     "title": "Example title",
     "body": "Example body",
     "permalink": "https://www.reddit.com/r/example/example_thread",
@@ -49,6 +50,7 @@ thread = {
 thread_no_url = {
     "url": None,
     "url_attr": None,
+    "image_url": "https://pngimg.com/uploads/cat/cat_PNG50487.png",
     "title": "Example title",
     "body": "Example body",
     "permalink": "https://www.reddit.com/r/example/example_thread",
@@ -62,3 +64,6 @@ thread_no_url = {
 }
 
 test_db_path = "tests/test_db.json"
+
+cat_image = "https://pngimg.com/uploads/cat/cat_PNG50487.png"
+not_image = "https://example.com"

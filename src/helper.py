@@ -4,8 +4,10 @@ from dataclasses import dataclass, field
 from enum import Enum, unique
 from typing import Dict, Union
 
+import requests
 from filestack import Client, Filelink, Security
 from requests import get, patch
+from tinydb import Query, TinyDB
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(message)s",
@@ -25,6 +27,7 @@ class Thread(Enum):
     url: str = "url"
     flair: str = "flair"
     body: str = "body"
+    image: str = "image"
 
 
 @dataclass
@@ -88,6 +91,7 @@ class FileDownloadError(Exception):
 
 @dataclass
 class DataBase:
+    # filestack DataBase
     db_path: str = "data/mirrored_threads.json"
 
     store_params: Dict[str, str] = field(
@@ -151,4 +155,43 @@ class DataBase:
         else:
             raise FileUploadError(
                 "Overwriting the database file from filestack failed."
+            )
+
+
+@dataclass
+class Util:
+    @staticmethod
+    def _check_if_image(url: str):
+        try:
+            resp = requests.head(url)
+            content_type = resp.headers.get("content-type")
+            if "image" in content_type:
+                return url
+        except Exception as e:
+            logging.error(f"Could not check image. {e}")
+            return None
+
+    @staticmethod
+    def _getattr_mod(__o: object, __name: str) -> Union[str, None]:
+        try:
+            return getattr(__o, __name)
+        except AttributeError:
+            return None
+
+    @staticmethod
+    def _check_thread_in_db(reddit_id: str, DB: TinyDB) -> bool:
+        q = Query()
+        if DB.search(q.reddit_id == reddit_id):
+            logging.info(f"Post with id {reddit_id} has already been mirrored.")
+            return True
+        return False
+
+    @staticmethod
+    def _insert_thread_into_db(thread: dict, DB: TinyDB) -> None:
+        try:
+            DB.insert(thread)
+            logging.info(f"Inserted {thread['reddit_id']} into TinyDB")
+        except Exception as e:
+            logging.error(
+                f"Could not insert {thread['reddit_id']} into TinyDB. Exception: {e}"
             )
