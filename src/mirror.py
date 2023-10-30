@@ -132,6 +132,7 @@ def get_threads_from_reddit(
         Thread.video,
         Thread.url,
     ],
+    filter: str = "new",
 ) -> List[Submission]:
     if limit > 100:
         logging.info(
@@ -139,11 +140,25 @@ def get_threads_from_reddit(
         )
         limit = 100
 
+    available_filters = ("new", "hot", "rising")
+    if filter not in available_filters:
+        filter = "new"
+        logging.info(f"The selected filter '{filter}' is not available. Setting to default 'new'. Available filters: {', '.join(available_filters)}")
+
     subreddit = reddit.subreddit(subreddit_name)
     logging.info(f"Searching subreddit r/{subreddit}")
 
-    listing = subreddit.new(limit=limit)
-    logging.info(f"Grabbed a list of threads from Reddit")
+    if filter == "new":
+        listing = subreddit.new(limit=limit)
+        logging.info(f"Grabbed a list of {filter} threads from Reddit")
+
+    elif filter == "hot":
+        listing = subreddit.new(limit=limit)
+        logging.info(f"Grabbed a list of {filter} threads from Reddit")
+
+    elif filter == "rising":
+        listing = subreddit.new(limit=limit)
+        logging.info(f"Grabbed a list of {filter} threads from Reddit")
 
     threads_to_mirror = _extract_threads_to_mirror(
         listing=listing, DB=DB, ignore=ignore

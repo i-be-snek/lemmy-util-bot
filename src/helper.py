@@ -93,6 +93,7 @@ class Config:
             self.MIRROR_THREADS_EVERY_SECOND: int = int(self.config.get("MIRROR_THREADS_EVERY_SECOND", 60))
             self.DELAY_BETWEEN_MIRRORED_THREADS_SECOND: int = int(self.config.get("DELAY_BETWEEN_MIRRORED_THREADS_SECOND", 60))
             self.REDDIT_FILTER_THREAD_LIMIT: int(self.config.get("REDDIT_FILTER_THREAD_LIMIT", 30))
+            self.FILTER_BY: str = self.config.get("FILTER_BY", "new")
 
 
 class FileUploadError(Exception):
