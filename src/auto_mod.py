@@ -30,22 +30,24 @@ class AutoMod:
 
     def _comment_as_mod(
         self,
-        content: str,
         post_id: int,
+        content: str,
     ) -> int:
+        print(content)
+        print(type(content))
         comment = self.auto_mod.comment.create(
             post_id=post_id, content=content, language_id=LanguageType.EN
         )
         comment_id = comment["comment_view"]["comment"]["id"]
         distinguish = self.auto_mod.comment.distinguish(
-            comment_id=comment_id, distinguish=True
+            comment_id=comment_id, distinguished=True
         )
 
         return comment_id
 
     def _find_new_threads(self) -> List[LemmyThread]:
         new_threads = self.auto_mod.post.list(
-            community_id=self.community_id, sort=SortType.New
+            community_id=self.community_id, sort=SortType.New, limit=50
         )
 
         output = []
@@ -64,16 +66,20 @@ class AutoMod:
                         True if i["creator"]["name"] == self.auto_mod_name else False,
                     )
                 )
+        logging.info(f"Found {len(output)} threads to add auto mod comment to.")
         return output
 
-    def automod_comment_on_new_threads(self, mod_message: str = None):
+    def comment_on_new_threads(self, mod_message: str = None):
         new_threads: dict = self._find_new_threads()
         if mod_message is None:
-            mod_message = open("mod_comment_new_threads.md", "r").read()
+            mod_message = open("src/mod_comment_new_threads.md", "r").read()
 
         for thread in new_threads:
             if not thread.deleted and not thread.removed and not thread.by_automod:
                 # add mod comment
-                comment = self._comment_as_mod(thread.post_id, mod_message)
+                comment = self._comment_as_mod(
+                    post_id=thread.post_id, content=mod_message
+                )
+                logging.info(comment)
                 # save thread
-                lemmy.post.save(post_id=thread.post_id, saved=True)
+                self.auto_mod.post.save(post_id=thread.post_id, saved=True)
