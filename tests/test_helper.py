@@ -6,8 +6,14 @@ from filestack import Client, Filelink
 from filestack.exceptions import FilestackHTTPError
 from tinydb import TinyDB
 
-from src.helper import (Config, DataBase, FileDownloadError, FileUploadError,
-                        RedditThread, Util)
+from src.helper import (
+    Config,
+    DataBase,
+    FileDownloadError,
+    FileUploadError,
+    RedditThread,
+    Util,
+)
 from tests import items
 
 
