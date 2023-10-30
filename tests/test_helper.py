@@ -1,11 +1,10 @@
 import os
-from collections import OrderedDict
 from unittest import mock
 
 import pytest
 from filestack import Client, Filelink
 from filestack.exceptions import FilestackHTTPError
-from tinydb import Query, TinyDB
+from tinydb import TinyDB
 
 from src.helper import (Config, DataBase, FileDownloadError, FileUploadError,
                         RedditThread, Util)
@@ -50,6 +49,7 @@ class TestClassDataBase:
                 file = test_filestack._upload_backup(
                     c.FILESTACK_APP_SECRET, c.FILESTACK_API_KEY, "test.json"
                 )
+                assert file
 
     def test_get_backup_bad_apikey_app_key_fail(self, test_filestack):
         c = Config(items.full_config)
@@ -68,6 +68,7 @@ class TestClassDataBase:
                     c.FILESTACK_API_KEY,
                     c.FILESTACK_HANDLE_REFRESH,
                 )
+                assert file
 
     def test_refresh_backup_bad_apikey_app_key_fail(self, test_filestack):
         c = Config(items.full_config)
@@ -86,6 +87,7 @@ class TestClassDataBase:
                     c.FILESTACK_API_KEY,
                     c.FILESTACK_HANDLE_REFRESH,
                 )
+                assert file
 
 
 class TestClassUtil:

@@ -1,16 +1,9 @@
-import os
 from unittest import mock
-
-import praw
-import pytest
 from tinydb import Query, TinyDB
 
-from src.helper import Config, Thread, Util
-from src.mirror import (
-    _extract_threads_to_mirror,
-    get_threads_from_reddit,
-    mirror_threads_to_lemmy,
-)
+from src.helper import RedditThread
+from src.mirror import (_extract_threads_to_mirror,
+                        mirror_threads_to_lemmy)
 from tests import items
 
 
@@ -36,7 +29,7 @@ class TestClassMirror:
         mock_listing.link_flair_text = None
 
         threads_to_mirror = _extract_threads_to_mirror(
-            [mock_listing], test_db, [Thread.poll]
+            [mock_listing], test_db, [RedditThread.poll]
         )
         assert len(threads_to_mirror) == 0
 
@@ -56,7 +49,7 @@ class TestClassMirror:
         mock_listing.link_flair_text = None
 
         threads_to_mirror = _extract_threads_to_mirror(
-            [mock_listing, mock_listing], test_db, [Thread.poll]
+            [mock_listing, mock_listing], test_db, [RedditThread.poll]
         )
         assert len(threads_to_mirror) == 2
 
