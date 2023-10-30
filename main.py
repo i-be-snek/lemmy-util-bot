@@ -40,9 +40,9 @@ def mirror(
         if not lemmy:
             return
 
-        # mirror_threads_to_lemmy(
-        #    lemmy, threads, config.LEMMY_COMMUNITY, database, mirror_delay
-        # )
+        mirror_threads_to_lemmy(
+            lemmy, threads, config.LEMMY_COMMUNITY, database, mirror_delay
+        )
 
 
 if __name__ == "__main__":
