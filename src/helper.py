@@ -88,8 +88,8 @@ class Config:
                 for x in self.config["THREADS_TO_IGNORE"].split(",")
             ]
 
-            self.BACKUP_FILESTACK_EVERY_MINUTE: int = int(self.config.get("BACKUP_FILESTACK_EVERY_MINUTE", 20))
-            self.REFRESH_FILESTACK_EVERY_HOUR: int = int(self.config.get("REFRESH_FILESTACK_EVERY_HOUR", 36))
+            self.BACKUP_FILESTACK_EVERY_HOUR: int = int(self.config.get("BACKUP_FILESTACK_EVERY_HOUR", 36))
+            self.REFRESH_FILESTACK_EVERY_MINUTE: int = int(self.config.get("REFRESH_FILESTACK_EVERY_MINUTE", 30))
             self.MIRROR_THREADS_EVERY_SECOND: int = int(self.config.get("MIRROR_THREADS_EVERY_SECOND", 60))
             self.DELAY_BETWEEN_MIRRORED_THREADS_SECOND: int = int(self.config.get("DELAY_BETWEEN_MIRRORED_THREADS_SECOND", 60))
             self.REDDIT_FILTER_THREAD_LIMIT: int(self.config.get("REDDIT_FILTER_THREAD_LIMIT", 30))

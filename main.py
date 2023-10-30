@@ -48,8 +48,8 @@ if __name__ == "__main__":
     # get config
     config = Config(dotenv_values(".env"))
 
-    backup_m = config.BACKUP_FILESTACK_EVERY_MINUTE
-    refresh_h = config.REFRESH_FILESTACK_EVERY_HOUR
+    backup_h = config.BACKUP_FILESTACK_EVERY_HOUR
+    refresh_m = config.REFRESH_FILESTACK_EVERY_MINUTE
     mirror_s = config.MIRROR_THREADS_EVERY_SECOND
     mirror_delay_s = config.DELAY_BETWEEN_MIRRORED_THREADS_SECOND
     filter_limit = config.REDDIT_FILTER_THREAD_LIMIT
@@ -86,7 +86,7 @@ if __name__ == "__main__":
     logging.info(f"Scheduler started")
 
     # refresh the database file in filestack
-    schedule.every(refresh_h).minutes.do(
+    schedule.every(refresh_m).minutes.do(
         filestack.refresh_backup,
         app_secret=config.FILESTACK_APP_SECRET,
         apikey=config.FILESTACK_API_KEY,
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     )
 
     # refresh the database backup in filestack
-    schedule.every(refresh_h).hours.do(
+    schedule.every(backup_h).hours.do(
         filestack.refresh_backup,
         app_secret=config.FILESTACK_APP_SECRET,
         apikey=config.FILESTACK_API_KEY,
