@@ -51,7 +51,7 @@ class Config:
         "THREADS_TO_IGNORE",
     )
 
-    additional_configs: tuple (
+    additional_configs: tuple = (
         "BACKUP_FILESTACK_EVERY_MINUTE",
         "REFRESH_FILESTACK_EVERY_HOUR",
         "MIRROR_THREADS_EVERY_SECOND",
