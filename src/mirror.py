@@ -3,13 +3,11 @@ from time import sleep
 from typing import List, Union
 
 import praw
-import pytest
-import requests
 from praw.models import ListingGenerator
 from praw.reddit import Submission
 from pythorhead import Lemmy
 from pythorhead.types import LanguageType
-from tinydb import Query, TinyDB
+from tinydb import TinyDB
 
 from src.helper import RedditThread, Util
 
@@ -23,14 +21,14 @@ logging.basicConfig(
 def _extract_threads_to_mirror(
     listing: ListingGenerator,
     DB: TinyDB,
-    ignore: list[Thread] = [
-        Thread.mirrored,
-        Thread.pinned,
-        Thread.nsfw,
-        Thread.poll,
-        Thread.locked,
-        Thread.video,
-        Thread.url,
+    ignore: list[RedditThread] = [
+        RedditThread.mirrored,
+        RedditThread.pinned,
+        RedditThread.nsfw,
+        RedditThread.poll,
+        RedditThread.locked,
+        RedditThread.video,
+        RedditThread.url,
     ],
 ) -> List[dict]:
     logging.info(f"Ignoring: {', '.join([_.value for _ in ignore])}")
@@ -143,7 +141,9 @@ def get_threads_from_reddit(
     available_filters = ("new", "hot", "rising")
     if filter not in available_filters:
         filter = "new"
-        logging.info(f"The selected filter '{filter}' is not available. Setting to default 'new'. Available filters: {', '.join(available_filters)}")
+        logging.info(
+            f"The selected filter '{filter}' is not available. Setting to default 'new'. Available filters: {', '.join(available_filters)}"
+        )
 
     subreddit = reddit.subreddit(subreddit_name)
     logging.info(f"Searching subreddit r/{subreddit}")
