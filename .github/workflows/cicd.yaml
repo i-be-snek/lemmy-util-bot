@@ -11,34 +11,12 @@ env:
   DO_image: registry.digitalocean.com/reddit-lemmy-mirror-bot/mirror-script:latest
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-    - name: Set up python
-      uses: actions/setup-python@v3
-      with:
-        python-version: 3.9
-    - name: Install poetry
-      uses: snok/install-poetry@v1
-      with:
-        version: 1.6.1
-        virtualenvs-create: true
-        virtualenvs-in-project: true
-    - name: Install deps via poetry
-      run: |
-        poetry install --with=test && echo $(poetry show)
-    - name: Run pytests
-      run: poetry run pytest
-
   build:
-    needs: test
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-    - name: Make envfile
+    - name: Make dotenv file
       uses: SpicyPizza/create-envfile@v2.0
       with:
         envkey_LEMMY_USERNAME: ${{ secrets.LEMMY_USERNAME }}
@@ -56,17 +34,15 @@ jobs:
         envkey_FILESTACK_APP_SECRET: ${{ secrets.FILESTACK_APP_SECRET }}
         envkey_FILESTACK_HANDLE_REFRESH: ${{ secrets.FILESTACK_HANDLE_REFRESH }}
         envkey_FILESTACK_HANDLE_BACKUP: ${{ secrets.FILESTACK_HANDLE_BACKUP }}
+        envkey_THREADS_TO_IGNORE: ${{ secrets.THREADS_TO_IGNORE }}
         file_name: .env
         fail_on_empty: true
         sort_keys: false
-
-    - name: Check .env via action
-      uses: the-coding-turtle/ga-file-list@v0.2
     - name: Build image
       run: docker build -t "${DO_image}" .
     - name: Save Docker image
       run: docker save --output image.tar "${DO_image}"
-    - name: Temporarily save Docker image
+    - name: Upload docker image artifact
       uses: actions/upload-artifact@v3
       with:
         name: docker-artifact
@@ -81,11 +57,10 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-    - name: Retrieve saved Docker image
+    - name: Retrieve uploaded Docker image from previous build
       uses: actions/download-artifact@v3
       with:
         name: docker-artifact
-        if-no-files-found: error
     - name: Load Docker image
       run: docker load --input image.tar
     - name: Install doctl

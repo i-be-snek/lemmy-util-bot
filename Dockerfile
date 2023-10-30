@@ -3,7 +3,7 @@ FROM mwalbeck/python-poetry:1.6.1-3.9
 
 RUN mkdir src tests data
 
-COPY main.py poetry.lock pyproject.toml .env /
+COPY main.py paused.py poetry.lock pyproject.toml .env /
 COPY tests/* tests
 COPY src/* src
 
@@ -11,4 +11,5 @@ RUN poetry config virtualenvs.create false && poetry install --only=main,test --
 RUN poetry run pytest tests/
 
 EXPOSE 80
-CMD ["poetry", "run", "python3", "main.py"]
+# CMD ["poetry", "run", "python3", "main.py"]
+CMD ["poetry", "run", "python3", "paused.py"]

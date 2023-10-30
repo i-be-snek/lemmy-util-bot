@@ -1,15 +1,17 @@
 import logging
 from time import sleep
 from typing import List, Union
-from unittest import mock
 
 import praw
 import pytest
+import requests
 from praw.models import ListingGenerator
 from praw.reddit import Submission
 from pythorhead import Lemmy
 from pythorhead.types import LanguageType
 from tinydb import Query, TinyDB
+
+from src.helper import Thread, Util
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(message)s",
@@ -18,96 +20,119 @@ logging.basicConfig(
 )
 
 
-def _check_thread_in_db(reddit_id: str, DB: TinyDB) -> bool:
-    q = Query()
-    if DB.search(q.reddit_id == reddit_id):
-        logging.info(f"Post with id {reddit_id} has already been mirrored.")
-        return True
-    return False
+def _extract_threads_to_mirror(
+    listing: ListingGenerator,
+    DB: TinyDB,
+    ignore: list[Thread] = [
+        Thread.mirrored,
+        Thread.pinned,
+        Thread.nsfw,
+        Thread.poll,
+        Thread.locked,
+        Thread.video,
+        Thread.url,
+    ],
+) -> List[dict]:
+    logging.info(f"Ignoring: {', '.join([_.value for _ in ignore])}")
 
-
-def _insert_thread_into_db(thread: dict, DB: TinyDB) -> None:
-    try:
-        DB.insert(thread)
-        logging.info(f"Inserted {thread['reddit_id']} into TinyDB")
-    except Exception as e:
-        logging.error(
-            f"Could not insert {thread['reddit_id']} into TinyDB. Exception: {e}"
-        )
-
-
-# TODO: fix type, this isn't a list with submissions, it's a generator
-def _extract_threads_to_mirror(listing: ListingGenerator, DB: TinyDB) -> List[dict]:
     threads_to_mirror = []
+
     for i in listing:
-        reddit_id: str = _getattr_mod(i, "name")
+        ignoring_post = False
+
+        reddit_id: str = Util._getattr_mod(i, "name")
 
         logging.info(f"Checking post {reddit_id}...")
 
-        is_mirrored = True if _check_thread_in_db(reddit_id, DB) else False
-        is_pinned: bool = False if _getattr_mod(i, "sitckied") == None else True
-        is_nsfw: bool = _getattr_mod(i, "over_18")
-        is_poll: bool = True if _getattr_mod(i, "poll_data") else False
-        is_locked: bool = _getattr_mod(i, "locked")
+        is_mirrored = True if Util._check_thread_in_db(reddit_id, DB) else False
+        is_pinned: bool = False if Util._getattr_mod(i, "sitckied") == None else True
+        is_nsfw: bool = Util._getattr_mod(i, "over_18")
+        is_poll: bool = True if Util._getattr_mod(i, "poll_data") else False
+        is_locked: bool = Util._getattr_mod(i, "locked")
+        is_video: bool = Util._getattr_mod(i, "is_video")
 
-        if is_pinned or is_nsfw or is_poll or is_locked or is_mirrored:
-            logging.info(
-                f"""Ignoring submission {i.name} with title {i.title}; is_pinned: {is_pinned}; is_nsfw: {is_nsfw}; is_poll: {is_poll}; is_locked: {is_locked}; is_mirrored --> {is_mirrored}
-            """.replace(
-                    "\n", " "
+        url_attr = Util._getattr_mod(i, "url")
+
+        # if the reddit_id is in the url, it's the url to the reddit post
+        # otherwise, it's the url to external content embedded into the thread
+        # the same goes for reddit gallery links
+        url: Union[str, None] = (
+            None if reddit_id.split("_", 1)[1] in url_attr else url_attr
+        )
+
+        # check if the url is an image
+        image = Util._check_if_image(url) if url is not None else None
+
+        # if it is, set the url to None
+        url = None if image is not None else url
+
+        title: str = getattr(i, "title")
+        body_attr = Util._getattr_mod(i, "selftext")
+        body: Union[str, None] = None if body_attr == "" else body_attr
+        permalink: str = f"https://www.reddit.com{Util._getattr_mod(i, 'permalink')}"
+        flair: Union[str, None] = Util._getattr_mod(i, "link_flair_text")
+        flair = flair.strip() if flair else None
+
+        ignore_map = {
+            Thread.mirrored: is_mirrored,
+            Thread.pinned: is_pinned,
+            Thread.nsfw: is_nsfw,
+            Thread.poll: is_poll,
+            Thread.locked: is_locked,
+            Thread.video: is_video,
+            Thread.url: url,
+            Thread.flair: flair,
+            Thread.body: body,
+            Thread.image: True if image else None,
+        }
+
+        for t in ignore:
+            if ignore_map[t]:
+                logging.info(
+                    f"Ignoring submission {i.name} with title {i.title}; {t.value} = {ignore_map[t]}"
                 )
-            )
+                ignoring_post = True
 
-        else:
-            # if the reddit_id is in the url, it's the url to the reddit post
-            # otherwise, it's the url to external content embedded into the thread
-            # the same goes for reddit gallery links
-            url_attr = _getattr_mod(i, "url")
-            url: Union[str, None] = (
-                None if reddit_id.split("_", 1)[1] in url_attr else url_attr
-            )
-            title: str = getattr(i, "title")
-            body_attr = _getattr_mod(i, "selftext")
-            body: Union[str, None] = None if body_attr == "" else body_attr
-            permalink: str = f"https://www.reddit.com{_getattr_mod(i, 'permalink')}"
-            flair: Union[str, None] = _getattr_mod(i, "link_flair_text")
-            flair = flair.strip() if flair else None
-
-            is_video: bool = _getattr_mod(i, "is_video")
-
+        if not ignoring_post:
             # only post threads with URL that are not a video
             # due to v.redd.it embedding video and sound separately
-            if url and not is_video:
-                data = {
-                    "url": url,
-                    "url_attr": url_attr,
-                    "title": title,
-                    "body_attr": body_attr,
-                    "body": body,
-                    "permalink": permalink,
-                    "reddit_id": reddit_id,
-                    "flair": flair,
-                    "is_video": is_video,
-                    "is_pinned": is_pinned,
-                    "is_nsfw": is_nsfw,
-                    "is_poll": is_poll,
-                    "is_locked": is_locked,
-                }
-                logging.info(f"Committing submission {i.name} with title {i.title}")
-                threads_to_mirror.append(data)
+            data = {
+                "url": url,
+                "image_url": image,
+                "url_attr": url_attr,
+                "title": title,
+                "body_attr": body_attr,
+                "body": body,
+                "permalink": permalink,
+                "reddit_id": reddit_id,
+                "flair": flair,
+                "is_video": is_video,
+                "is_pinned": is_pinned,
+                "is_nsfw": is_nsfw,
+                "is_poll": is_poll,
+                "is_locked": is_locked,
+            }
+            logging.info(f"Committing submission {i.name} with title {i.title}")
+            threads_to_mirror.append(data)
 
     return threads_to_mirror
 
 
-def _getattr_mod(__o: object, __name: str) -> Union[str, None]:
-    try:
-        return getattr(__o, __name)
-    except AttributeError:
-        return None
-
-
 def get_threads_from_reddit(
-    reddit: praw.Reddit, subreddit_name: str, DB: TinyDB, limit: int = 100
+    reddit: praw.Reddit,
+    subreddit_name: str,
+    DB: TinyDB,
+    limit: int = 100,
+    ignore: list[Thread] = [
+        Thread.mirrored,
+        Thread.pinned,
+        Thread.nsfw,
+        Thread.poll,
+        Thread.locked,
+        Thread.video,
+        Thread.url,
+    ],
+    filter: str = "new",
 ) -> List[Submission]:
     if limit > 100:
         logging.info(
@@ -115,13 +140,29 @@ def get_threads_from_reddit(
         )
         limit = 100
 
+    available_filters = ("new", "hot", "rising")
+    if filter not in available_filters:
+        filter = "new"
+        logging.info(f"The selected filter '{filter}' is not available. Setting to default 'new'. Available filters: {', '.join(available_filters)}")
+
     subreddit = reddit.subreddit(subreddit_name)
     logging.info(f"Searching subreddit r/{subreddit}")
 
-    listing = subreddit.new(limit=limit)
-    logging.info(f"Grabbed a list of threads from Reddit")
+    if filter == "new":
+        listing = subreddit.new(limit=limit)
+        logging.info(f"Grabbed a list of {filter} threads from Reddit")
 
-    threads_to_mirror = _extract_threads_to_mirror(listing=listing, DB=DB)
+    elif filter == "hot":
+        listing = subreddit.hot(limit=limit)
+        logging.info(f"Grabbed a list of {filter} threads from Reddit")
+
+    elif filter == "rising":
+        listing = subreddit.rising(limit=limit)
+        logging.info(f"Grabbed a list of {filter} threads from Reddit")
+
+    threads_to_mirror = _extract_threads_to_mirror(
+        listing=listing, DB=DB, ignore=ignore
+    )
     logging.info(f"Found {len(threads_to_mirror)} threads to mirror")
 
     return threads_to_mirror
@@ -140,7 +181,7 @@ def mirror_threads_to_lemmy(
     posted = False
     for thread in threads_to_mirror:
         sleep(delay)
-        if not _check_thread_in_db(thread["reddit_id"], DB):
+        if not Util._check_thread_in_db(thread["reddit_id"], DB):
             # generate a bot disclaimer
             bot_body = f"(This post was mirrored by a bot. [The original post can be found here]({thread['permalink']}))"
 
@@ -158,14 +199,18 @@ def mirror_threads_to_lemmy(
                 else thread["title"]
             )
 
-            # only mirror posts with links
+            # add a url or image url if they exist
             thread_url = thread["url"]
+            image_url = thread["image_url"]
+
+            # link to the url or external content
+            url = thread_url if thread_url is not None else image_url
 
             try:
                 lemmy.post.create(
                     community_id=community_id,
                     name=thread_title,
-                    url=thread_url,
+                    url=url,
                     nsfw=None,
                     body=post_body,
                     language_id=LanguageType.EN,
@@ -178,7 +223,7 @@ def mirror_threads_to_lemmy(
 
             if posted:
                 num_mirrored_posts += 1
-                _insert_thread_into_db(thread, DB)
+                Util._insert_thread_into_db(thread, DB)
                 logging.info(
                     f"Posted thread with reddit_id {thread['reddit_id']} in {community}"
                 )

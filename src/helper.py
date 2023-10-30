@@ -1,16 +1,33 @@
 import datetime
 import logging
 from dataclasses import dataclass, field
+from enum import Enum, unique
 from typing import Dict, Union
 
+import requests
 from filestack import Client, Filelink, Security
 from requests import get, patch
+from tinydb import Query, TinyDB
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(message)s",
     level=logging.INFO,
     datefmt="%Y-%m-%d %H:%M:%S",
 )
+
+
+@unique
+class Thread(Enum):
+    mirrored: str = "mirrored"
+    pinned: str = "pinned"
+    nsfw: str = "nsfw"
+    poll: str = "poll"
+    locked: str = "locked"
+    video: str = "video"
+    url: str = "url"
+    flair: str = "flair"
+    body: str = "body"
+    image: str = "image"
 
 
 @dataclass
@@ -31,6 +48,16 @@ class Config:
         "FILESTACK_APP_SECRET",
         "FILESTACK_HANDLE_REFRESH",
         "FILESTACK_HANDLE_BACKUP",
+        "THREADS_TO_IGNORE",
+    )
+
+    additional_configs: tuple = (
+        "BACKUP_FILESTACK_EVERY_MINUTE",
+        "REFRESH_FILESTACK_EVERY_HOUR",
+        "MIRROR_THREADS_EVERY_SECOND",
+        "DELAY_BETWEEN_MIRRORED_THREADS_SECOND",
+        "REDDIT_FILTER_THREAD_LIMIT",
+        "FILTER_BY"
     )
     keys_missing: bool = False
 
@@ -57,6 +84,17 @@ class Config:
             self.FILESTACK_APP_SECRET: str = self.config["FILESTACK_APP_SECRET"]
             self.FILESTACK_HANDLE_REFRESH: str = self.config["FILESTACK_HANDLE_REFRESH"]
             self.FILESTACK_HANDLE_BACKUP: str = self.config["FILESTACK_HANDLE_BACKUP"]
+            self.THREADS_TO_IGNORE: list = [
+                Thread.__getattr__(x)
+                for x in self.config["THREADS_TO_IGNORE"].split(",")
+            ]
+
+            self.BACKUP_FILESTACK_EVERY_HOUR: int = int(self.config.get("BACKUP_FILESTACK_EVERY_HOUR", 36))
+            self.REFRESH_FILESTACK_EVERY_MINUTE: int = int(self.config.get("REFRESH_FILESTACK_EVERY_MINUTE", 30))
+            self.MIRROR_THREADS_EVERY_SECOND: int = int(self.config.get("MIRROR_THREADS_EVERY_SECOND", 60))
+            self.DELAY_BETWEEN_MIRRORED_THREADS_SECOND: int = int(self.config.get("DELAY_BETWEEN_MIRRORED_THREADS_SECOND", 60))
+            self.REDDIT_FILTER_THREAD_LIMIT: int = int(self.config.get("REDDIT_FILTER_THREAD_LIMIT", 30))
+            self.FILTER_BY: str = self.config.get("FILTER_BY", "new")
 
 
 class FileUploadError(Exception):
@@ -69,6 +107,7 @@ class FileDownloadError(Exception):
 
 @dataclass
 class DataBase:
+    # filestack DataBase
     db_path: str = "data/mirrored_threads.json"
 
     store_params: Dict[str, str] = field(
@@ -86,12 +125,17 @@ class DataBase:
             )
         }
 
-    def _upload_backup(self, app_secret: str, token: str, filename: str):
+    def _upload_backup(
+        self, app_secret: str, apikey: str, filename: str, db_path: str = None
+    ):
+        if db_path is None:
+            db_path = self.db_path
+
         security = Security(self.refresh_policy(), app_secret)
-        client = Client(token, security=security)
+        client = Client(apikey, security=security)
 
         file = client.upload(
-            filepath=self.db_path,
+            filepath=db_path,
             store_params=self.store_params | {"filename": filename},
         )
 
@@ -99,12 +143,13 @@ class DataBase:
             logging.info(
                 f"Uploading file {filename} to {file.url} with handle {file.handle}."
             )
+            return file
         else:
             raise FileUploadError("Upload to filestack failed.")
 
-    def get_backup(self, app_secret: str, token: str, handle: str):
+    def get_backup(self, app_secret: str, apikey: str, handle: str):
         security = Security(self.refresh_policy(), app_secret)
-        client = Client(token, security=security)
+        client = Client(apikey, security=security)
         filelink = Filelink(handle=handle, security=security)
         d = filelink.download(self.db_path)
         if not (d is None):
@@ -114,9 +159,9 @@ class DataBase:
         else:
             raise FileDownloadError("Pulling backup from filestack failed")
 
-    def refresh_backup(self, app_secret: str, token: str, handle: str):
+    def refresh_backup(self, app_secret: str, apikey: str, handle: str):
         security = Security(self.refresh_policy(), app_secret)
-        client = Client(token, security=security)
+        client = Client(apikey, security=security)
         filelink = Filelink(handle=handle, security=security)
         o = filelink.overwrite(filepath=self.db_path, security=security)
         if not (o is None):
@@ -126,4 +171,43 @@ class DataBase:
         else:
             raise FileUploadError(
                 "Overwriting the database file from filestack failed."
+            )
+
+
+@dataclass
+class Util:
+    @staticmethod
+    def _check_if_image(url: str):
+        try:
+            resp = requests.head(url)
+            content_type = resp.headers.get("content-type")
+            if "image" in content_type:
+                return url
+        except Exception as e:
+            logging.error(f"Could not check image. {e}")
+            return None
+
+    @staticmethod
+    def _getattr_mod(__o: object, __name: str) -> Union[str, None]:
+        try:
+            return getattr(__o, __name)
+        except AttributeError:
+            return None
+
+    @staticmethod
+    def _check_thread_in_db(reddit_id: str, DB: TinyDB) -> bool:
+        q = Query()
+        if DB.search(q.reddit_id == reddit_id):
+            logging.info(f"Post with id {reddit_id} has already been mirrored.")
+            return True
+        return False
+
+    @staticmethod
+    def _insert_thread_into_db(thread: dict, DB: TinyDB) -> None:
+        try:
+            DB.insert(thread)
+            logging.info(f"Inserted {thread['reddit_id']} into TinyDB")
+        except Exception as e:
+            logging.error(
+                f"Could not insert {thread['reddit_id']} into TinyDB. Exception: {e}"
             )
