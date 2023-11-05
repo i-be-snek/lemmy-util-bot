@@ -20,7 +20,7 @@ logging.basicConfig(
 schedule_logger = logging.getLogger("schedule")
 # set to logging.DEBUG when debugging
 # be careful: will reveal .env secrets
-schedule_logger.setLevel(level=logging.DEBUG)
+schedule_logger.setLevel(level=logging.INFO)
 
 
 def mirror(
