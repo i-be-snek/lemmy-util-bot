@@ -19,7 +19,7 @@ from tests import items
 
 class TestClassHelper:
     def test_check_configs_missing_config(self):
-        with pytest.raises(AssertionError):
+        with pytest.raises(KeyError):
             Config(items.config_missing_keys)
 
     def test_check_configs(self):
