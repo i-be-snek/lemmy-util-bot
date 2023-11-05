@@ -17,6 +17,9 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
+schedule_logger = logging.getLogger('schedule')
+# set to logging.DEBUG when debugging
+schedule_logger.setLevel(level=logging.INFO)
 
 def mirror(
     reddit: praw.Reddit,
@@ -61,16 +64,16 @@ def raiseError(e):
 if __name__ == "__main__":
     # get config
     config = Config(dotenv_values(".env"))
-    needs_database: tuple = (Task.mirror_threads)
+    needs_database = [Task.mirror_threads]
 
     # authenticate with lemmy
     lemmy = lemmy_auth(config)
 
     # schedule tasks
-    if Task.comment_on_new_threads in config.TASKS:
+    if Task.mod_comment_on_new_threads in config.TASKS:
         interval = 120
         schedule.every(interval).seconds.do(automod_comment_on_new_threads, config=config, lemmy=lemmy)
-        logging.info(f"Checking for new posts every {interval} seconds")
+        logging.info(f"TASK: Checking for new posts every {interval} seconds")
 
     if Task.mirror_threads in config.TASKS:
 
@@ -126,9 +129,8 @@ if __name__ == "__main__":
             handle=config.FILESTACK_HANDLE_BACKUP,
         )
 
-        logging.info(f"Mirroring every {mirror_s} seconds with a delay of {mirror_delay_s} seconds between threads; checking up to {filter_limit} threads at a time")
+        logging.info(f"TASK: Mirroring every {mirror_s} seconds with a delay of {mirror_delay_s} seconds between threads; checking up to {filter_limit} threads at a time")
         logging.info(f"Refreshing the database file every {refresh_m} minutes; creating a backup copy every {backup_h} hours")
-
 
 
     if any([x in needs_database for x in config.TASKS]):

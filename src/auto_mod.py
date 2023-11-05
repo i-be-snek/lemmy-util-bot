@@ -54,7 +54,7 @@ class AutoMod:
 
     def _find_new_threads(self) -> List[LemmyThread]:
         new_threads = self.auto_mod.post.list(
-            community_id=self.community_id, sort=SortType.New, limit=50
+            community_id=self.community_id, sort=SortType.New, limit=20
         )
 
         output = []
@@ -81,12 +81,16 @@ class AutoMod:
         if mod_message is None:
             mod_message = open("src/mod_comment_new_threads.md", "r").read()
 
+        num = 0
         for thread in new_threads:
             if not thread.deleted and not thread.removed and not thread.by_automod:
                 # add mod comment
+                num += 1
+                logging.info(f"Commenting on thread with ID: {thread.post_id}")
                 comment = self._comment_as_mod(
                     post_id=thread.post_id, content=mod_message
                 )
-                logging.info(comment)
                 # save thread
                 self.auto_mod.post.save(post_id=thread.post_id, saved=True)
+
+        logging.info(f"Added mod comment to {num} threads")
