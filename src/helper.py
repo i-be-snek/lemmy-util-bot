@@ -6,6 +6,7 @@ from typing import Dict, Union
 
 import requests
 from filestack import Client, Filelink, Security
+from requests import get, patch
 from tinydb import Query, TinyDB
 
 logging.basicConfig(
@@ -16,7 +17,7 @@ logging.basicConfig(
 
 
 @unique
-class RedditThread(Enum):
+class Thread(Enum):
     mirrored: str = "mirrored"
     pinned: str = "pinned"
     nsfw: str = "nsfw"
@@ -29,25 +30,14 @@ class RedditThread(Enum):
     image: str = "image"
 
 
-@unique
-class Task(Enum):
-    mirror_threads: str = "mirror_threads"
-    mod_comment_on_new_threads: str = "mod_comment_on_new_threads"
-
-
 @dataclass
 class Config:
     config: dict
-    main_configs: tuple = (
+    vital_configs: tuple = (
         "LEMMY_USERNAME",
         "LEMMY_PASSWORD",
         "LEMMY_INSTANCE",
         "LEMMY_COMMUNITY",
-        "TASKS",
-    )
-
-    mirror_configs: tuple = (
-        "THREADS_TO_IGNORE",
         "REDDIT_CLIENT_ID",
         "REDDIT_CLIENT_SECRET",
         "REDDIT_PASSWORD",
@@ -58,45 +48,32 @@ class Config:
         "FILESTACK_APP_SECRET",
         "FILESTACK_HANDLE_REFRESH",
         "FILESTACK_HANDLE_BACKUP",
+        "THREADS_TO_IGNORE",
     )
 
-    configs_with_defaults: tuple = (
+    additional_configs: tuple = (
         "BACKUP_FILESTACK_EVERY_MINUTE",
         "REFRESH_FILESTACK_EVERY_HOUR",
         "MIRROR_THREADS_EVERY_SECOND",
         "DELAY_BETWEEN_MIRRORED_THREADS_SECOND",
         "REDDIT_FILTER_THREAD_LIMIT",
-        "FILTER_BY",
+        "FILTER_BY"
     )
     keys_missing: bool = False
 
     def __post_init__(self):
-        for c in self.main_configs:
+        for c in self.vital_configs:
             if c not in self.config.keys():
-                logging.error(f"Main variable {c} is missing")
+                logging.error(f"Variable {c} is missing")
                 self.keys_missing = True
-
-        self.TASKS: list = [
-            Util._getattr_mod(Task, x) for x in Util._get_clean_list(self.config["TASKS"])
-        ]
-
-        if Task.mirror_threads in self.TASKS:
-            for c in self.mirror_configs:
-                if c not in self.mirror_configs:
-                    logging.error(f"'mirror_threads' variable {c} is missing")
-                    self.keys_missing = True
 
         if self.keys_missing:
             raise AssertionError("One or more variables are missing")
-
-
-        if Task.mod_comment_on_new_threads in self.TASKS:
+        else:
             self.LEMMY_USERNAME: str = self.config["LEMMY_USERNAME"]
             self.LEMMY_PASSWORD: str = self.config["LEMMY_PASSWORD"]
             self.LEMMY_INSTANCE: str = self.config["LEMMY_INSTANCE"]
             self.LEMMY_COMMUNITY: str = self.config["LEMMY_COMMUNITY"]
-
-        if Task.mirror_threads in self.TASKS:
             self.REDDIT_CLIENT_ID: str = self.config["REDDIT_CLIENT_ID"]
             self.REDDIT_CLIENT_SECRET: str = self.config["REDDIT_CLIENT_SECRET"]
             self.REDDIT_PASSWORD: str = self.config["REDDIT_PASSWORD"]
@@ -108,27 +85,15 @@ class Config:
             self.FILESTACK_HANDLE_REFRESH: str = self.config["FILESTACK_HANDLE_REFRESH"]
             self.FILESTACK_HANDLE_BACKUP: str = self.config["FILESTACK_HANDLE_BACKUP"]
             self.THREADS_TO_IGNORE: list = [
-                Util._getattr_mod(RedditThread, x)
-                for x in Util._get_clean_list(self.config["THREADS_TO_IGNORE"])
+                Thread.__getattr__(x)
+                for x in self.config["THREADS_TO_IGNORE"].split(",")
             ]
-            self.THREADS_TO_IGNORE = (
-                self.THREADS_TO_IGNORE if self.THREADS_TO_IGNORE != [""] else []
-            )
-            self.BACKUP_FILESTACK_EVERY_HOUR: int = int(
-                self.config.get("BACKUP_FILESTACK_EVERY_HOUR", 36)
-            )
-            self.REFRESH_FILESTACK_EVERY_MINUTE: int = int(
-                self.config.get("REFRESH_FILESTACK_EVERY_MINUTE", 30)
-            )
-            self.MIRROR_THREADS_EVERY_SECOND: int = int(
-                self.config.get("MIRROR_THREADS_EVERY_SECOND", 60)
-            )
-            self.DELAY_BETWEEN_MIRRORED_THREADS_SECOND: int = int(
-                self.config.get("DELAY_BETWEEN_MIRRORED_THREADS_SECOND", 60)
-            )
-            self.REDDIT_FILTER_THREAD_LIMIT: int = int(
-                self.config.get("REDDIT_FILTER_THREAD_LIMIT", 30)
-            )
+
+            self.BACKUP_FILESTACK_EVERY_HOUR: int = int(self.config.get("BACKUP_FILESTACK_EVERY_HOUR", 36))
+            self.REFRESH_FILESTACK_EVERY_MINUTE: int = int(self.config.get("REFRESH_FILESTACK_EVERY_MINUTE", 30))
+            self.MIRROR_THREADS_EVERY_SECOND: int = int(self.config.get("MIRROR_THREADS_EVERY_SECOND", 60))
+            self.DELAY_BETWEEN_MIRRORED_THREADS_SECOND: int = int(self.config.get("DELAY_BETWEEN_MIRRORED_THREADS_SECOND", 60))
+            self.REDDIT_FILTER_THREAD_LIMIT: int = int(self.config.get("REDDIT_FILTER_THREAD_LIMIT", 30))
             self.FILTER_BY: str = self.config.get("FILTER_BY", "new")
 
 
@@ -246,12 +211,3 @@ class Util:
             logging.error(
                 f"Could not insert {thread['reddit_id']} into TinyDB. Exception: {e}"
             )
-
-    @staticmethod
-    def _get_clean_list(text: str, sep: str = ",") -> list:
-        split_list = text.split(sep)
-        print(split_list)
-        for i in range(len(split_list)):
-            split_list[i] = split_list[i].strip()
-
-        return split_list

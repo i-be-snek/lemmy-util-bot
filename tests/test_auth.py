@@ -2,6 +2,7 @@ from unittest import mock
 
 import praw
 import pytest
+from pythorhead import Lemmy
 
 from src.auth import lemmy_auth, lemmy_init_instance, lemmy_login, reddit_oauth
 from src.helper import Config

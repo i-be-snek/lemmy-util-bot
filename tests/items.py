@@ -29,7 +29,6 @@ full_config = OrderedDict(
         "FILESTACK_HANDLE_REFRESH": "LIbC0wBfsAzs62QadcDrZ",
         "FILESTACK_HANDLE_BACKUP": "GAbC0wsdfDacYQadaS",
         "THREADS_TO_IGNORE": "mirrored,pinned,nsfw",
-        "TASKS": "mirror_threads, mod_comment_on_new_threads",
     }
 )
 thread = {
@@ -68,25 +67,3 @@ test_db_path = "tests/test_db.json"
 
 cat_image = "https://pngimg.com/uploads/cat/cat_PNG50487.png"
 not_image = "https://example.com"
-
-thread_list_response_lemmy_unsaved = {
-    "post": {
-        "deleted": False,
-        "removed": False,
-        "locked": False,
-        "id": 3,
-    },
-    "creator": {"name": "p!ckles", "bot_account": False},
-    "saved": False,
-}
-
-thread_list_response_lemmy_saved = {
-    "post": {
-        "deleted": False,
-        "removed": False,
-        "locked": False,
-        "id": 5,
-    },
-    "creator": {"name": "Space246", "bot_account": False},
-    "saved": True,
-}
