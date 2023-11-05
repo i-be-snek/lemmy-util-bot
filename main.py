@@ -17,9 +17,11 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
-schedule_logger = logging.getLogger('schedule')
+schedule_logger = logging.getLogger("schedule")
 # set to logging.DEBUG when debugging
-schedule_logger.setLevel(level=logging.INFO)
+# be careful: will reveal .env secrets
+schedule_logger.setLevel(level=logging.DEBUG)
+
 
 def mirror(
     reddit: praw.Reddit,
@@ -27,6 +29,7 @@ def mirror(
     filter: str,
     limit: int = 10,
     mirror_delay: int = 25,
+    cancel_after_first_run: bool = False,
 ) -> None:
     logging.info("Attempting to mirror threads")
 
@@ -52,10 +55,15 @@ def mirror(
             lemmy, threads, config.LEMMY_COMMUNITY, database, mirror_delay
         )
 
+    # if this is the first mirror job to run
+    if cancel_after_first_run:
+        return schedule.CancelJob
+
 
 def automod_comment_on_new_threads(config: dict, lemmy: Lemmy):
     auto_mod = AutoMod(lemmy, config.LEMMY_COMMUNITY, config.LEMMY_USERNAME)
     auto_mod.comment_on_new_threads()
+
 
 def raiseError(e):
     raise e
@@ -72,11 +80,12 @@ if __name__ == "__main__":
     # schedule tasks
     if Task.mod_comment_on_new_threads in config.TASKS:
         interval = 120
-        schedule.every(interval).seconds.do(automod_comment_on_new_threads, config=config, lemmy=lemmy)
+        schedule.every(interval).seconds.do(
+            automod_comment_on_new_threads, config=config, lemmy=lemmy
+        )
         logging.info(f"TASK: Checking for new posts every {interval} seconds")
 
     if Task.mirror_threads in config.TASKS:
-
         backup_h = config.BACKUP_FILESTACK_EVERY_HOUR
         refresh_m = config.REFRESH_FILESTACK_EVERY_MINUTE
         mirror_s = config.MIRROR_THREADS_EVERY_SECOND
@@ -92,7 +101,6 @@ if __name__ == "__main__":
             handle=config.FILESTACK_HANDLE_REFRESH,
         )
 
-
         # confirm the file has been downloaded
         assert os.path.exists(database_path) or raiseError(FileNotFoundError)
 
@@ -103,8 +111,6 @@ if __name__ == "__main__":
         reddit = reddit_oauth(config)
 
         # if threads exist, authenticate with lemmy and mirror threads
-
-
         schedule.every(mirror_s).seconds.do(
             mirror,
             reddit=reddit,
@@ -113,6 +119,20 @@ if __name__ == "__main__":
             limit=filter_limit,
             mirror_delay=mirror_delay_s,
         )
+
+        # the scheduler will run the first job after {mirror_s} seconds
+        # but for the bot to activate immediately, we can run the function
+        # first as a separate job and cancel it after the first run
+        schedule.every().seconds.do(
+            mirror,
+            reddit=reddit,
+            database=database,
+            filter=config.FILTER_BY,
+            limit=filter_limit,
+            mirror_delay=mirror_delay_s,
+            cancel_after_first_run=True,
+        )
+
         # refresh the database file in filestack
         schedule.every(refresh_m).minutes.do(
             filestack.refresh_backup,
@@ -129,9 +149,12 @@ if __name__ == "__main__":
             handle=config.FILESTACK_HANDLE_BACKUP,
         )
 
-        logging.info(f"TASK: Mirroring every {mirror_s} seconds with a delay of {mirror_delay_s} seconds between threads; checking up to {filter_limit} threads at a time")
-        logging.info(f"Refreshing the database file every {refresh_m} minutes; creating a backup copy every {backup_h} hours")
-
+        logging.info(
+            f"TASK: Mirroring threads every {mirror_s} seconds with a delay of {mirror_delay_s} seconds between threads; checking up to {filter_limit} threads at a time, starting now..."
+        )
+        logging.info(
+            f"Refreshing the database file every {refresh_m} minutes; creating a backup copy every {backup_h} hours"
+        )
 
     if any([x in needs_database for x in config.TASKS]):
         # start scheduler with database
