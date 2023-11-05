@@ -11,6 +11,14 @@ env:
   DO_image: registry.digitalocean.com/reddit-lemmy-mirror-bot/mirror-script:latest
 
 jobs:
+
+  dummy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: echo
+      uses: echo "dummy check"
   build:
     runs-on: ubuntu-latest
     steps:
