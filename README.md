@@ -96,7 +96,7 @@ This is the step where you can configure your bot.
     ```
     
     Finally, paste the `TASKS` variable into the file with a list of the tasks you want the bot to perform.
-    For example, to mirror threads and also post a mod comment on new threads, add the names of both tasks separated by a comma
+    For example, to mirror threads and also post a mod comment on new threads, add the names of both tasks separated by a comma. The names of available tasks [can be found here](#supported-tasks)
 
     ```shell
     TASKS=mod_comment_on_new_threads, mirror_threads
@@ -116,7 +116,7 @@ This is the step where you can configure your bot.
 
  [!WARNING]  
  Steps 4-9 are only needed the `mirror_threads` task. 
- 
+
 
 4. **Fill the Reddit variables**  
 
