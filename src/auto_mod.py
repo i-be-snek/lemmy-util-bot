@@ -33,15 +33,22 @@ class AutoMod:
         post_id: int,
         content: str,
     ) -> int:
-        print(content)
-        print(type(content))
-        comment = self.auto_mod.comment.create(
-            post_id=post_id, content=content, language_id=LanguageType.EN
-        )
+        try:
+            comment = self.auto_mod.comment.create(
+                post_id=post_id, content=content, language_id=LanguageType.EN
+            )
+        except Exception as e:
+            logging.error(f"Could not comment! {e}")
+
         comment_id = comment["comment_view"]["comment"]["id"]
-        distinguish = self.auto_mod.comment.distinguish(
-            comment_id=comment_id, distinguished=True
-        )
+
+        try:
+            distinguish = self.auto_mod.comment.distinguish(
+                comment_id=comment_id, distinguished=True
+            )
+
+        except Exception as e:
+            logging.error(f"Could not distinguish comment {commend_id} as a Mod! {e}")
 
         return comment_id
 
