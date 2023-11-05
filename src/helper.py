@@ -73,15 +73,22 @@ class Config:
     def __post_init__(self):
         for c in self.main_configs:
             if c not in self.config.keys():
-                logging.error(f"Variable {c} is missing")
+                logging.error(f"Main variable {c} is missing")
                 self.keys_missing = True
-
-        if self.keys_missing:
-            raise AssertionError("One or more variables are missing")
 
         self.TASKS: list = [
             Util._getattr_mod(Task, x) for x in Util._get_clean_list(self.config["TASKS"])
         ]
+
+        if Task.mirror_threads in self.TASKS:
+            for c in self.mirror_configs:
+                if c not in self.mirror_configs:
+                    logging.error(f"'mirror_threads' variable {c} is missing")
+                    self.keys_missing = True
+
+        if self.keys_missing:
+            raise AssertionError("One or more variables are missing")
+
 
         if Task.mod_comment_on_new_threads in self.TASKS:
             self.LEMMY_USERNAME: str = self.config["LEMMY_USERNAME"]
