@@ -92,6 +92,7 @@ if __name__ == "__main__":
         mirror_s = config.MIRROR_THREADS_EVERY_SECOND
         mirror_delay_s = config.DELAY_BETWEEN_MIRRORED_THREADS_SECOND
         filter_limit = config.REDDIT_FILTER_THREAD_LIMIT
+        reddit_cap = config.REDDIT_CAP_NUMBER_OF_MIRRORED_THREADS
 
         # get latest backup of the database
         database_path = "data/mirrored_threads.json"
@@ -116,7 +117,7 @@ if __name__ == "__main__":
             mirror,
             reddit=reddit,
             database=database,
-            mirror_threads_limit=config.REDDIT_CAP_NUMBER_OF_MIRRORED_THREADS,
+            mirror_threads_limit=reddit_cap,
             filter=config.FILTER_BY,
             reddit_filter_limit=filter_limit,
             mirror_delay=mirror_delay_s,
@@ -129,7 +130,7 @@ if __name__ == "__main__":
             mirror,
             reddit=reddit,
             database=database,
-            mirror_threads_limit=config.REDDIT_CAP_NUMBER_OF_MIRRORED_THREADS,
+            mirror_threads_limit=reddit_cap,
             filter=config.FILTER_BY,
             reddit_filter_limit=filter_limit,
             mirror_delay=mirror_delay_s,
@@ -153,7 +154,9 @@ if __name__ == "__main__":
         )
 
         logging.info(
-            f"TASK: Mirroring threads every {mirror_s} seconds with a delay of {mirror_delay_s} seconds between threads; checking up to {filter_limit} threads at a time, starting now..."
+            f"TASK: Mirroring threads every {mirror_s} seconds with a delay of {mirror_delay_s} seconds between threads")
+        
+        logging.info(f"Checking up to {filter_limit} threads at a time, posting {reddit_cap} at a time, starting now..."
         )
         logging.info(
             f"Refreshing the database file every {refresh_m} minutes; creating a backup copy every {backup_h} hours"
