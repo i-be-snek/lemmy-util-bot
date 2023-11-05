@@ -78,7 +78,8 @@ class Config:
                 self.keys_missing = True
 
         self.TASKS: list = [
-            Util._getattr_mod(Task, x) for x in Util._get_clean_list(self.config["TASKS"])
+            Util._getattr_mod(Task, x)
+            for x in Util._get_clean_list(self.config["TASKS"])
         ]
 
         if Task.mirror_threads in self.TASKS:
@@ -90,12 +91,10 @@ class Config:
         if self.keys_missing:
             raise AssertionError("One or more variables are missing")
 
-
-        if Task.mod_comment_on_new_threads in self.TASKS:
-            self.LEMMY_USERNAME: str = self.config["LEMMY_USERNAME"]
-            self.LEMMY_PASSWORD: str = self.config["LEMMY_PASSWORD"]
-            self.LEMMY_INSTANCE: str = self.config["LEMMY_INSTANCE"]
-            self.LEMMY_COMMUNITY: str = self.config["LEMMY_COMMUNITY"]
+        self.LEMMY_USERNAME: str = self.config["LEMMY_USERNAME"]
+        self.LEMMY_PASSWORD: str = self.config["LEMMY_PASSWORD"]
+        self.LEMMY_INSTANCE: str = self.config["LEMMY_INSTANCE"]
+        self.LEMMY_COMMUNITY: str = self.config["LEMMY_COMMUNITY"]
 
         if Task.mirror_threads in self.TASKS:
             self.REDDIT_CLIENT_ID: str = self.config["REDDIT_CLIENT_ID"]
@@ -130,7 +129,7 @@ class Config:
             self.REDDIT_FILTER_THREAD_LIMIT: int = int(
                 self.config.get("REDDIT_FILTER_THREAD_LIMIT", 30)
             )
-            self.REDDIT_FILTER_THREAD_LIMIT: int = int(
+            self.REDDIT_CAP_NUMBER_OF_MIRRORED_THREADS: int = int(
                 self.config.get("REDDIT_CAP_NUMBER_OF_MIRRORED_THREADS", 10)
             )
 
@@ -255,7 +254,6 @@ class Util:
     @staticmethod
     def _get_clean_list(text: str, sep: str = ",") -> list:
         split_list = text.split(sep)
-        print(split_list)
         for i in range(len(split_list)):
             split_list[i] = split_list[i].strip()
 
