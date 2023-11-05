@@ -250,7 +250,6 @@ class Util:
     @staticmethod
     def _get_clean_list(text: str, sep: str = ",") -> list:
         split_list = text.split(sep)
-        print(split_list)
         for i in range(len(split_list)):
             split_list[i] = split_list[i].strip()
 
