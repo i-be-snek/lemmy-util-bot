@@ -67,6 +67,7 @@ class Config:
         "DELAY_BETWEEN_MIRRORED_THREADS_SECOND",
         "REDDIT_FILTER_THREAD_LIMIT",
         "FILTER_BY",
+        "REDDIT_CAP_NUMBER_OF_MIRRORED_THREADS",
     )
     keys_missing: bool = False
 
@@ -129,6 +130,10 @@ class Config:
             self.REDDIT_FILTER_THREAD_LIMIT: int = int(
                 self.config.get("REDDIT_FILTER_THREAD_LIMIT", 30)
             )
+            self.REDDIT_FILTER_THREAD_LIMIT: int = int(
+                self.config.get("REDDIT_CAP_NUMBER_OF_MIRRORED_THREADS", 10)
+            )
+
             self.FILTER_BY: str = self.config.get("FILTER_BY", "new")
 
 

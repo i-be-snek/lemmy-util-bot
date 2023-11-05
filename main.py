@@ -26,8 +26,9 @@ schedule_logger.setLevel(level=logging.INFO)
 def mirror(
     reddit: praw.Reddit,
     database: TinyDB,
+    mirror_threads_limit: int,
     filter: str,
-    limit: int = 10,
+    reddit_filter_limit: int = 10,
     mirror_delay: int = 25,
     cancel_after_first_run: bool = False,
 ) -> None:
@@ -40,7 +41,7 @@ def mirror(
         reddit,
         config.REDDIT_SUBREDDIT,
         database,
-        limit=limit,
+        limit=reddit_filter_limit,
         ignore=config.THREADS_TO_IGNORE,
         filter=filter,
     )
@@ -52,7 +53,7 @@ def mirror(
             return
 
         mirror_threads_to_lemmy(
-            lemmy, threads, config.LEMMY_COMMUNITY, database, mirror_delay
+            lemmy, threads[:mirror_threads_limit], config.LEMMY_COMMUNITY, database, mirror_delay
         )
 
     # if this is the first mirror job to run
@@ -115,8 +116,9 @@ if __name__ == "__main__":
             mirror,
             reddit=reddit,
             database=database,
+            mirror_threads_limit=config.REDDIT_CAP_NUMBER_OF_MIRRORED_THREADS,
             filter=config.FILTER_BY,
-            limit=filter_limit,
+            reddit_filter_limit=filter_limit,
             mirror_delay=mirror_delay_s,
         )
 
@@ -127,8 +129,9 @@ if __name__ == "__main__":
             mirror,
             reddit=reddit,
             database=database,
+            mirror_threads_limit=config.REDDIT_CAP_NUMBER_OF_MIRRORED_THREADS,
             filter=config.FILTER_BY,
-            limit=filter_limit,
+            reddit_filter_limit=filter_limit,
             mirror_delay=mirror_delay_s,
             cancel_after_first_run=True,
         )
