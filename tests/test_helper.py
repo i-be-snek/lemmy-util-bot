@@ -1,18 +1,17 @@
 import os
-from collections import OrderedDict
 from unittest import mock
 
 import pytest
 from filestack import Client, Filelink
 from filestack.exceptions import FilestackHTTPError
-from tinydb import Query, TinyDB
+from tinydb import TinyDB
 
 from src.helper import (
     Config,
     DataBase,
     FileDownloadError,
     FileUploadError,
-    Thread,
+    RedditThread,
     Util,
 )
 from tests import items
@@ -20,7 +19,7 @@ from tests import items
 
 class TestClassHelper:
     def test_check_configs_missing_config(self):
-        with pytest.raises(AssertionError):
+        with pytest.raises(KeyError):
             Config(items.config_missing_keys)
 
     def test_check_configs(self):
@@ -28,9 +27,9 @@ class TestClassHelper:
 
     def test_check_configs_ignore_list(self):
         assert Config(items.full_config).THREADS_TO_IGNORE == [
-            Thread.mirrored,
-            Thread.pinned,
-            Thread.nsfw,
+            RedditThread.mirrored,
+            RedditThread.pinned,
+            RedditThread.nsfw,
         ]
 
     def test_check_prod_configs(self):
@@ -56,6 +55,7 @@ class TestClassDataBase:
                 file = test_filestack._upload_backup(
                     c.FILESTACK_APP_SECRET, c.FILESTACK_API_KEY, "test.json"
                 )
+                assert file
 
     def test_get_backup_bad_apikey_app_key_fail(self, test_filestack):
         c = Config(items.full_config)
@@ -74,6 +74,7 @@ class TestClassDataBase:
                     c.FILESTACK_API_KEY,
                     c.FILESTACK_HANDLE_REFRESH,
                 )
+                assert file
 
     def test_refresh_backup_bad_apikey_app_key_fail(self, test_filestack):
         c = Config(items.full_config)
@@ -92,6 +93,7 @@ class TestClassDataBase:
                     c.FILESTACK_API_KEY,
                     c.FILESTACK_HANDLE_REFRESH,
                 )
+                assert file
 
 
 class TestClassUtil:

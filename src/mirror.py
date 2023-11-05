@@ -3,15 +3,13 @@ from time import sleep
 from typing import List, Union
 
 import praw
-import pytest
-import requests
 from praw.models import ListingGenerator
 from praw.reddit import Submission
 from pythorhead import Lemmy
 from pythorhead.types import LanguageType
-from tinydb import Query, TinyDB
+from tinydb import TinyDB
 
-from src.helper import Thread, Util
+from src.helper import RedditThread, Util
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(message)s",
@@ -23,14 +21,14 @@ logging.basicConfig(
 def _extract_threads_to_mirror(
     listing: ListingGenerator,
     DB: TinyDB,
-    ignore: list[Thread] = [
-        Thread.mirrored,
-        Thread.pinned,
-        Thread.nsfw,
-        Thread.poll,
-        Thread.locked,
-        Thread.video,
-        Thread.url,
+    ignore: list[RedditThread] = [
+        RedditThread.mirrored,
+        RedditThread.pinned,
+        RedditThread.nsfw,
+        RedditThread.poll,
+        RedditThread.locked,
+        RedditThread.video,
+        RedditThread.url,
     ],
 ) -> List[dict]:
     logging.info(f"Ignoring: {', '.join([_.value for _ in ignore])}")
@@ -61,7 +59,7 @@ def _extract_threads_to_mirror(
         )
 
         # check if the url is an image
-        image = Util._check_if_image(url) if url is not None else None
+        image = Util._check_if_image(url) if url else None
 
         # if it is, set the url to None
         url = None if image is not None else url
@@ -74,16 +72,16 @@ def _extract_threads_to_mirror(
         flair = flair.strip() if flair else None
 
         ignore_map = {
-            Thread.mirrored: is_mirrored,
-            Thread.pinned: is_pinned,
-            Thread.nsfw: is_nsfw,
-            Thread.poll: is_poll,
-            Thread.locked: is_locked,
-            Thread.video: is_video,
-            Thread.url: url,
-            Thread.flair: flair,
-            Thread.body: body,
-            Thread.image: True if image else None,
+            RedditThread.mirrored: is_mirrored,
+            RedditThread.pinned: is_pinned,
+            RedditThread.nsfw: is_nsfw,
+            RedditThread.poll: is_poll,
+            RedditThread.locked: is_locked,
+            RedditThread.video: is_video,
+            RedditThread.url: url,
+            RedditThread.flair: flair,
+            RedditThread.body: body,
+            RedditThread.image: True if image else None,
         }
 
         for t in ignore:
@@ -123,14 +121,14 @@ def get_threads_from_reddit(
     subreddit_name: str,
     DB: TinyDB,
     limit: int = 100,
-    ignore: list[Thread] = [
-        Thread.mirrored,
-        Thread.pinned,
-        Thread.nsfw,
-        Thread.poll,
-        Thread.locked,
-        Thread.video,
-        Thread.url,
+    ignore: list[RedditThread] = [
+        RedditThread.mirrored,
+        RedditThread.pinned,
+        RedditThread.nsfw,
+        RedditThread.poll,
+        RedditThread.locked,
+        RedditThread.video,
+        RedditThread.url,
     ],
     filter: str = "new",
 ) -> List[Submission]:
@@ -143,7 +141,9 @@ def get_threads_from_reddit(
     available_filters = ("new", "hot", "rising")
     if filter not in available_filters:
         filter = "new"
-        logging.info(f"The selected filter '{filter}' is not available. Setting to default 'new'. Available filters: {', '.join(available_filters)}")
+        logging.info(
+            f"The selected filter '{filter}' is not available. Setting to default 'new'. Available filters: {', '.join(available_filters)}"
+        )
 
     subreddit = reddit.subreddit(subreddit_name)
     logging.info(f"Searching subreddit r/{subreddit}")
