@@ -1,19 +1,29 @@
 # Lemmy Utility Bot
 
-### This is a lemmy utility bot (in the making). Supported Tasks:
+### This is a lemmy utility bot (in the making).
 
-- #### [Currently supported] Mirror threads from reddit to lemmy
-- #### [Upcoming] Mod comment to all new threads
-- #### [Upcoming] Media Bias/Fact Check comment on new URL threads
+#### Supported Tasks:
 
+
+
+| TASK NAME                  | DESCRIPTION    | STATUS     |
+| ------------------------   | ---------------| ---------- |
+| `mod_comment_on_new_threads` | Add a custom mod message to all new posts in a lemmy community | SUPPORTED :white_check_mark:
+| `mirror_threads`             | Mirror threads from one reddit sub to one lemmy instance       | SUPPORTED :white_check_mark:
+|   TBD                      |  Media Bias/Fact Check comment on new URL threads              | IN PROGRESS :hammer:
+
+This project is a hobby project and open to requests. 
 
 ## Prerequisites
 1. [Poetry](https://python-poetry.org/docs/#installation), version 1.6, With Python >=3.9,<3.12
-2. [Docker](https://docs.docker.com/engine/install/), version 24 or above. 
+2. [Docker](https://docs.docker.com/engine/install/), version >= 24.0
+3. Basic knowledge of python, docker, and git
 
+## Deploying your own instance of the bot
 
-## Deploying your own instance of the bot (MIRROR)
+You can deploy your own instance of the bot, either locally on your own computer, or by deploying it to a cloud service. One easy and check option is [Digital Ocean](https://docs.digitalocean.com/products/)
 
+Follow these steps to configure and run the bot:
 
 ### (A) Initial setup and prequisites
 1. Clone this repo
@@ -58,11 +68,19 @@ This is the step where you can configure your bot.
 
 2. Open the file in your favorite editor and paste the following inside:
 
+
+    For the `mod_comment_on_new_threads` task: 
+
     ```shell
     LEMMY_USERNAME=
     LEMMY_PASSWORD=
     LEMMY_INSTANCE=
     LEMMY_COMMUNITY=
+    ```
+    
+    For the `mirror_threads` task: 
+
+    ```shell
     REDDIT_CLIENT_ID= 
     REDDIT_CLIENT_SECRET= 
     REDDIT_PASSWORD=
@@ -74,8 +92,16 @@ This is the step where you can configure your bot.
     FILESTACK_HANDLE_REFRESH=
     FILESTACK_HANDLE_BACKUP=
     THREADS_TO_IGNORE=
-
+    FILTER_BY=
     ```
+    
+    Finally, paste the `TASKS` variable into the file with a list of the tasks you want the bot to perform.
+    For example, to mirror threads and also post a mod comment on new threads, add the names of both tasks separated by a comma
+
+    ```shell
+    TASKS=mod_comment_on_new_threads, mirror_threads
+    ```
+    
 
 3. **Fill the Lemmy variables.** 
 
@@ -88,7 +114,11 @@ This is the step where you can configure your bot.
     LEMMY_COMMUNITY="world"
     ```
 
-4. **Fill the Reddit variables** 
+ [!WARNING]  
+ Steps 4-9 are only needed the `mirror_threads` task. 
+ 
+
+4. **Fill the Reddit variables**  
 
     `REDDIT_USERNAME` and `REDDIT_PASSWORD` are self-explanatory (but do not add `u/` to the username). 
     
