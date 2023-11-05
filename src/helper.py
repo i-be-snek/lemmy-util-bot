@@ -29,14 +29,25 @@ class RedditThread(Enum):
     image: str = "image"
 
 
+@unique
+class Task(Enum):
+    mirror_threads: str = "mirror_threads"
+    mod_comment_on_new_threads: str = "mod_comment_on_new_threads"
+
+
 @dataclass
 class Config:
     config: dict
-    vital_configs: tuple = (
+    main_configs: tuple = (
         "LEMMY_USERNAME",
         "LEMMY_PASSWORD",
         "LEMMY_INSTANCE",
         "LEMMY_COMMUNITY",
+        "TASKS",
+    )
+
+    mirror_configs: tuple = (
+        "THREADS_TO_IGNORE",
         "REDDIT_CLIENT_ID",
         "REDDIT_CLIENT_SECRET",
         "REDDIT_PASSWORD",
@@ -47,10 +58,9 @@ class Config:
         "FILESTACK_APP_SECRET",
         "FILESTACK_HANDLE_REFRESH",
         "FILESTACK_HANDLE_BACKUP",
-        "THREADS_TO_IGNORE",
     )
 
-    additional_configs: tuple = (
+    configs_with_defaults: tuple = (
         "BACKUP_FILESTACK_EVERY_MINUTE",
         "REFRESH_FILESTACK_EVERY_HOUR",
         "MIRROR_THREADS_EVERY_SECOND",
@@ -61,18 +71,25 @@ class Config:
     keys_missing: bool = False
 
     def __post_init__(self):
-        for c in self.vital_configs:
+        for c in self.main_configs:
             if c not in self.config.keys():
                 logging.error(f"Variable {c} is missing")
                 self.keys_missing = True
 
         if self.keys_missing:
             raise AssertionError("One or more variables are missing")
-        else:
+
+        self.TASKS: list = [
+            Util._getattr_mod(Task, x) for x in self.config["TASKS"].split(",")
+        ]
+
+        if Task.mod_comment_on_new_threads in self.TASKS:
             self.LEMMY_USERNAME: str = self.config["LEMMY_USERNAME"]
             self.LEMMY_PASSWORD: str = self.config["LEMMY_PASSWORD"]
             self.LEMMY_INSTANCE: str = self.config["LEMMY_INSTANCE"]
             self.LEMMY_COMMUNITY: str = self.config["LEMMY_COMMUNITY"]
+
+        if Task.mirror_threads in self.TASKS:
             self.REDDIT_CLIENT_ID: str = self.config["REDDIT_CLIENT_ID"]
             self.REDDIT_CLIENT_SECRET: str = self.config["REDDIT_CLIENT_SECRET"]
             self.REDDIT_PASSWORD: str = self.config["REDDIT_PASSWORD"]
@@ -84,10 +101,12 @@ class Config:
             self.FILESTACK_HANDLE_REFRESH: str = self.config["FILESTACK_HANDLE_REFRESH"]
             self.FILESTACK_HANDLE_BACKUP: str = self.config["FILESTACK_HANDLE_BACKUP"]
             self.THREADS_TO_IGNORE: list = [
-                RedditThread.__getattr__(x)
+                Util._getattr_mod(RedditThread, x)
                 for x in self.config["THREADS_TO_IGNORE"].split(",")
             ]
-
+            self.THREADS_TO_IGNORE = (
+                self.THREADS_TO_IGNORE if self.THREADS_TO_IGNORE != [""] else []
+            )
             self.BACKUP_FILESTACK_EVERY_HOUR: int = int(
                 self.config.get("BACKUP_FILESTACK_EVERY_HOUR", 36)
             )

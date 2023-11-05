@@ -29,6 +29,7 @@ full_config = OrderedDict(
         "FILESTACK_HANDLE_REFRESH": "LIbC0wBfsAzs62QadcDrZ",
         "FILESTACK_HANDLE_BACKUP": "GAbC0wsdfDacYQadaS",
         "THREADS_TO_IGNORE": "mirrored,pinned,nsfw",
+        "TASKS": "mirror_threads,mod_comment_on_new_threads",
     }
 )
 thread = {
