@@ -1,6 +1,6 @@
 # Lemmy Utility Bot
 
-### This is a lemmy utility bot (in the making). Supported features:
+### This is a lemmy utility bot (in the making). Supported Tasks:
 
 - #### [Currently supported] Mirror threads from reddit to lemmy
 - #### [Upcoming] Mod comment to all new threads
