@@ -80,7 +80,7 @@ class Config:
             raise AssertionError("One or more variables are missing")
 
         self.TASKS: list = [
-            Util._getattr_mod(Task, x) for x in self.config["TASKS"].split(",")
+            Util._getattr_mod(Task, x) for x in Util._get_clean_list(self.config["TASKS"])
         ]
 
         if Task.mod_comment_on_new_threads in self.TASKS:
@@ -102,7 +102,7 @@ class Config:
             self.FILESTACK_HANDLE_BACKUP: str = self.config["FILESTACK_HANDLE_BACKUP"]
             self.THREADS_TO_IGNORE: list = [
                 Util._getattr_mod(RedditThread, x)
-                for x in self.config["THREADS_TO_IGNORE"].split(",")
+                for x in Util._get_clean_list(self.config["THREADS_TO_IGNORE"])
             ]
             self.THREADS_TO_IGNORE = (
                 self.THREADS_TO_IGNORE if self.THREADS_TO_IGNORE != [""] else []
@@ -239,3 +239,12 @@ class Util:
             logging.error(
                 f"Could not insert {thread['reddit_id']} into TinyDB. Exception: {e}"
             )
+
+    @staticmethod
+    def _get_clean_list(text: str, sep: str = ",") -> list:
+        split_list = text.split(sep)
+        print(split_list)
+        for i in range(len(split_list)):
+            split_list[i] = split_list[i].strip()
+
+        return split_list
