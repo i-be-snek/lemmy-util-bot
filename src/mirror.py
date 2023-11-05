@@ -59,7 +59,7 @@ def _extract_threads_to_mirror(
         )
 
         # check if the url is an image
-        image = Util._check_if_image(url) if url is not None else None
+        image = Util._check_if_image(url) if url else None
 
         # if it is, set the url to None
         url = None if image is not None else url
