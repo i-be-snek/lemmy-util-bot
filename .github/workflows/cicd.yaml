@@ -18,7 +18,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
     - name: echo
-      uses: echo "dummy check"
+      run: echo "dummy check"
   build:
     runs-on: ubuntu-latest
     steps:
