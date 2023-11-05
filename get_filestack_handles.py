@@ -1,12 +1,4 @@
 from src.helper import DataBase
-import logging
-
-logging.basicConfig(
-    format="%(asctime)s %(levelname)-8s %(message)s",
-    level=logging.INFO,
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
-
 
 def get_handles():
     apikey = input("Enter Filestack API Key: ").strip()
@@ -20,10 +12,16 @@ def get_handles():
 
     try:
         refresh_file = db._upload_backup(
-            app_secret=app_secret, apikey=apikey, filename=refresh_filename, db_path=db_path
+            app_secret=app_secret,
+            apikey=apikey,
+            filename=refresh_filename,
+            db_path=db_path,
         )
         backup_file = db._upload_backup(
-            app_secret=app_secret, apikey=apikey, filename=backup_filename, db_path=db_path
+            app_secret=app_secret,
+            apikey=apikey,
+            filename=backup_filename,
+            db_path=db_path,
         )
         print("\n\n")
         print("Add these variables to the .env file")
