@@ -48,7 +48,7 @@ class AutoMod:
             )
 
         except Exception as e:
-            logging.error(f"Could not distinguish comment {commend_id} as a Mod! {e}")
+            logging.error(f"Could not distinguish comment {comment_id} as a Mod! {e}")
 
         return comment_id
 
