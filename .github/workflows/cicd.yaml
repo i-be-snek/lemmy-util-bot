@@ -35,6 +35,15 @@ jobs:
         envkey_FILESTACK_HANDLE_REFRESH: ${{ secrets.FILESTACK_HANDLE_REFRESH }}
         envkey_FILESTACK_HANDLE_BACKUP: ${{ secrets.FILESTACK_HANDLE_BACKUP }}
         envkey_THREADS_TO_IGNORE: ${{ secrets.THREADS_TO_IGNORE }}
+        envkey_BACKUP_FILESTACK_EVERY_HOUR: ${{ BACKUP_FILESTACK_EVERY_HOUR }}
+        envkey_REFRESH_FILESTACK_EVERY_MINUTE: ${{ REFRESH_FILESTACK_EVERY_MINUTE }}
+        envkey_MIRROR_THREADS_EVERY_SECOND: ${{ MIRROR_THREADS_EVERY_SECOND }}
+        envkey_DELAY_BETWEEN_MIRRORED_THREADS_SECOND: ${{ DELAY_BETWEEN_MIRRORED_THREADS_SECOND }}
+        envkey_REDDIT_FILTER_THREAD_LIMIT: ${{ REDDIT_FILTER_THREAD_LIMIT }}
+        envkey_FILTER_BY: ${{ FILTER_BY }}
+        envkey_TASKS: ${{ TASKS }}
+
+
         file_name: .env
         fail_on_empty: true
         sort_keys: false
