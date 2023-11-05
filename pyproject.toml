@@ -19,7 +19,7 @@ filestack-python = "^3.5.0"
 ipykernel = "^6.25.2"
 black = "^23.9.1"
 isort = "^5.12.0"
-autoflake = "^2.2.1"
+pylint = "^3.0.2"
 
 [tool.poetry.group.test.dependencies]
 pytest-cov = "^4.1.0"

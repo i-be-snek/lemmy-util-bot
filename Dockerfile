@@ -11,4 +11,5 @@ RUN poetry config virtualenvs.create false && poetry install --only=main,test --
 RUN poetry run pytest tests/
 
 EXPOSE 80
-CMD ["poetry", "run", "python3", "main.py"]
+# CMD ["poetry", "run", "python3", "main.py"]
+CMD ["poetry", "run", "python3", "paused.py"]
