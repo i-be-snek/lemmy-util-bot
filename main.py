@@ -33,8 +33,6 @@ def mirror(
     mirror_delay: int = 25,
     cancel_after_first_run: bool = False,
 ) -> None:
-    logging.info("Attempting to mirror threads")
-
     if not reddit:
         return
 
@@ -43,7 +41,7 @@ def mirror(
         config.REDDIT_SUBREDDIT,
         database,
         limit=reddit_filter_limit,
-        ignore=config.THREADS_TO_IGNORE,
+        ignore_thread_types=config.THREADS_TO_IGNORE,
         filter=filter,
     )
 
@@ -54,11 +52,13 @@ def mirror(
             return
 
         thread_sample = random.sample(threads, mirror_threads_limit)
-        logging.info(f"Cappting the number of threads to mirror at {mirror_threads_limit}")
+        logging.info(f"Capping the number of threads to mirror at {mirror_threads_limit}")
 
         mirror_threads_to_lemmy(
             lemmy, thread_sample, config.LEMMY_COMMUNITY, database, mirror_delay
         )
+    
+    logging.info(f"Posted {mirror_threads_limit} threads in total")
 
     # if this is the first mirror job to run
     if cancel_after_first_run:
