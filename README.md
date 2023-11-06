@@ -11,6 +11,7 @@
 | `mod_comment_on_new_threads` | Add a [custom mod message](#configure-the-mod-message) to all new posts in a lemmy community | SUPPORTED :white_check_mark:
 | `mirror_threads`             | Mirror threads from one reddit sub to one lemmy instance       | SUPPORTED :white_check_mark:
 |   TBD                      |  Media Bias/Fact Check comment on new URL threads              | IN PROGRESS :hammer:
+|   TBD                      |  Send an auto-message to users reporting content | IN PROGRESS :hammer:
 
 This project is a hobby project and open to requests. 
 
