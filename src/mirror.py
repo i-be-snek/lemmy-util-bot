@@ -8,6 +8,7 @@ from praw.reddit import Submission
 from pythorhead import Lemmy
 from pythorhead.types import LanguageType
 from tinydb import TinyDB
+import re
 
 from src.helper import RedditThread, Util
 
@@ -49,6 +50,7 @@ def _extract_threads_to_mirror(
         is_locked: bool = Util._getattr_mod(i, "locked")
         is_video: bool = Util._getattr_mod(i, "is_video")
 
+
         url_attr = Util._getattr_mod(i, "url")
 
         # if the reddit_id is in the url, it's the url to the reddit post
@@ -58,11 +60,17 @@ def _extract_threads_to_mirror(
             None if reddit_id.split("_", 1)[1] in url_attr else url_attr
         )
 
+        # check if url is a reddit gallery
+        if url:
+            reddit_gallery: bool = True if re.match("^(https://v.redd.it/)\w+$", url) else False
+        else:
+            reddit_gallery: bool = False
+        
         # check if the url is an image
-        image = Util._check_if_image(url) if url else None
+        image = Util._check_if_image(url) if (url is not None and reddit_gallery is False) else None
 
         # if it is, set the url to None
-        url = None if image is not None else url
+        url = None if (image is not None and reddit_gallery is not False) else url
 
         title: str = getattr(i, "title")
         body_attr = Util._getattr_mod(i, "selftext")
@@ -82,6 +90,7 @@ def _extract_threads_to_mirror(
             RedditThread.flair: True if flair else None,
             RedditThread.body: True if body else None,
             RedditThread.image: True if image else None,
+            RedditThread.reddit_gallery: reddit_gallery
         }
 
         for t in ignore_thread_types:
@@ -109,6 +118,7 @@ def _extract_threads_to_mirror(
                 "is_nsfw": is_nsfw,
                 "is_poll": is_poll,
                 "is_locked": is_locked,
+                "reddit_gallery": reddit_gallery
             }
             logging.info(f"Committing submission {i.name} with title {i.title}")
             threads_to_mirror.append(data)
@@ -207,14 +217,14 @@ def mirror_threads_to_lemmy(
             url = thread_url if thread_url is not None else image_url
 
             try:
-                lemmy.post.create(
-                    community_id=community_id,
-                    name=thread_title,
-                    url=url,
-                    nsfw=None,
-                    body=post_body,
-                    language_id=LanguageType.EN,
-                )
+            #    lemmy.post.create(
+            #        community_id=community_id,
+            #        name=thread_title,
+            #        url=url,
+            #        nsfw=None,
+            #        body=post_body,
+            #        language_id=LanguageType.EN,
+            #    )
                 posted = True
             except Exception as e:
                 logging.error(
