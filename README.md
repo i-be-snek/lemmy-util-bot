@@ -15,6 +15,10 @@
 
 This project is a hobby project and open to requests. 
 
+| :zap:      Deployed on   |
+|-----------------------------------------|
+| [!exmuslim@lemmy.world](https://lemmy.world/c/exmuslim) | 
+| [!atheismindia@lemmy.world](https://lemmy.world/c/atheismindia) |
 
 ## Prerequisites
 1. [Poetry](https://python-poetry.org/docs/#installation), version 1.6, With Python >=3.9,<3.12
@@ -116,8 +120,9 @@ This is the step where you can configure your bot.
     LEMMY_COMMUNITY="world"
     ```
 
- [!WARNING]  
- Steps 4-9 are only needed the `mirror_threads` task. 
+
+> [!WARNING]  
+> Steps 4-9 are only needed the `mirror_threads` task. 
 
 
 4. **Fill the Reddit variables**  
