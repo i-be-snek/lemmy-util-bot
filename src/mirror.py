@@ -62,8 +62,9 @@ def _extract_threads_to_mirror(
         )
         
         # add the missing reddit domain if missing in url from api
-        if url.startswith("/r/"):
-            url = f"{reddit_domain}{url}"
+        if url is not None: 
+            if url.startswith("/r/"):
+                url = f"{reddit_domain}{url}"
 
         # check if url is a reddit gallery
         if url:
@@ -83,6 +84,7 @@ def _extract_threads_to_mirror(
         permalink: str = f"{reddit_domain}{Util._getattr_mod(i, 'permalink')}"
         flair: Union[str, None] = Util._getattr_mod(i, "link_flair_text")
         flair = flair.strip() if flair else None
+        only_has_body = True if (body is not None and not url and not image and not is_video) else False
 
         ignore_map = {
             RedditThread.mirrored: is_mirrored,
@@ -93,7 +95,7 @@ def _extract_threads_to_mirror(
             RedditThread.video: is_video,
             RedditThread.url: True if url else None,
             RedditThread.flair: True if flair else None,
-            RedditThread.body: True if body else None,
+            RedditThread.body: only_has_body,
             RedditThread.image: True if image else None,
             RedditThread.reddit_gallery: reddit_gallery
         }
