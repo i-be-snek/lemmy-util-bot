@@ -217,14 +217,14 @@ def mirror_threads_to_lemmy(
             url = thread_url if thread_url is not None else image_url
 
             try:
-            #    lemmy.post.create(
-            #        community_id=community_id,
-            #        name=thread_title,
-            #        url=url,
-            #        nsfw=None,
-            #        body=post_body,
-            #        language_id=LanguageType.EN,
-            #    )
+                lemmy.post.create(
+                    community_id=community_id,
+                    name=thread_title,
+                    url=url,
+                    nsfw=None,
+                    body=post_body,
+                    language_id=LanguageType.EN,
+                )
                 posted = True
             except Exception as e:
                 logging.error(
