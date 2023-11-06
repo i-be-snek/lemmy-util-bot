@@ -8,7 +8,7 @@ on:
     - main
 
 env:
-  DO_image: registry.digitalocean.com/reddit-lemmy-mirror-bot/mirror-script:latest
+  DO_image: registry.digitalocean.com/reddit-lemmy-mirror-bot/mirror-script-exmuslim:latest
 
 jobs:
 
