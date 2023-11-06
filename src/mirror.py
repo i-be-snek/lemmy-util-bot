@@ -21,7 +21,7 @@ logging.basicConfig(
 def _extract_threads_to_mirror(
     listing: ListingGenerator,
     DB: TinyDB,
-    ignore: list[RedditThread] = [
+    ignore_thread_types: list[RedditThread] = [
         RedditThread.mirrored,
         RedditThread.pinned,
         RedditThread.nsfw,
@@ -31,7 +31,7 @@ def _extract_threads_to_mirror(
         RedditThread.url,
     ],
 ) -> List[dict]:
-    logging.info(f"Ignoring: {', '.join([_.value for _ in ignore])}")
+    logging.info(f"Ignoring: {', '.join([_.value for _ in ignore_thread_types])}")
 
     threads_to_mirror = []
 
@@ -84,7 +84,7 @@ def _extract_threads_to_mirror(
             RedditThread.image: True if image else None,
         }
 
-        for t in ignore:
+        for t in ignore_thread_types:
             if ignore_map[t]:
                 logging.info(
                     f"Ignoring submission {i.name} with title {i.title}; {t.value} = {ignore_map[t]}"
@@ -121,7 +121,7 @@ def get_threads_from_reddit(
     subreddit_name: str,
     DB: TinyDB,
     limit: int = 100,
-    ignore: list[RedditThread] = [
+    ignore_thread_types: list[RedditThread] = [
         RedditThread.mirrored,
         RedditThread.pinned,
         RedditThread.nsfw,
@@ -161,9 +161,9 @@ def get_threads_from_reddit(
         logging.info(f"Grabbed a list of {filter} threads from Reddit")
 
     threads_to_mirror = _extract_threads_to_mirror(
-        listing=listing, DB=DB, ignore=ignore
+        listing=listing, DB=DB, ignore_thread_types=ignore_thread_types
     )
-    logging.info(f"Found {len(threads_to_mirror)} threads to mirror")
+    logging.info(f"Found {len(threads_to_mirror)} potential threads to mirror")
 
     return threads_to_mirror
 
