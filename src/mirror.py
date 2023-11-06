@@ -35,6 +35,7 @@ def _extract_threads_to_mirror(
     logging.info(f"Ignoring: {', '.join([_.value for _ in ignore_thread_types])}")
 
     threads_to_mirror = []
+    reddit_domain = "https://www.reddit.com"
 
     for i in listing:
         ignoring_post = False
@@ -59,6 +60,10 @@ def _extract_threads_to_mirror(
         url: Union[str, None] = (
             None if reddit_id.split("_", 1)[1] in url_attr else url_attr
         )
+        
+        # add the missing reddit domain if missing in url from api
+        if url.startswith("/r/"):
+            url = f"{reddit_domain}{url}"
 
         # check if url is a reddit gallery
         if url:
@@ -75,7 +80,7 @@ def _extract_threads_to_mirror(
         title: str = getattr(i, "title")
         body_attr = Util._getattr_mod(i, "selftext")
         body: Union[str, None] = None if body_attr == "" else body_attr
-        permalink: str = f"https://www.reddit.com{Util._getattr_mod(i, 'permalink')}"
+        permalink: str = f"{reddit_domain}{Util._getattr_mod(i, 'permalink')}"
         flair: Union[str, None] = Util._getattr_mod(i, "link_flair_text")
         flair = flair.strip() if flair else None
 
