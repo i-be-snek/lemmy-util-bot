@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
     # schedule tasks
     if Task.mod_comment_on_new_threads in config.TASKS:
-        interval = 120
+        interval = 60*3
         schedule.every(interval).seconds.do(
             automod_comment_on_new_threads, config=config, lemmy=lemmy
         )
