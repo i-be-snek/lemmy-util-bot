@@ -61,7 +61,7 @@ class AutoMod:
 
         for i in new_threads:
             # automod saves posts it already commented on
-            if i["saved"] is False:
+            if i["saved"] is False and i["post"]["deleted"] is False:
                 output.append(
                     LemmyThread(
                         i["post"]["deleted"],
@@ -83,7 +83,7 @@ class AutoMod:
 
         num = 0
         for thread in new_threads:
-            if not thread.deleted and not thread.removed and not thread.by_automod:
+            if not thread.deleted and not thread.removed:
                 # add mod comment
                 num += 1
                 logging.info(f"Commenting on thread with ID: {thread.post_id}")

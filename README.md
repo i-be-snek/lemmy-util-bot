@@ -11,9 +11,14 @@
 | `mod_comment_on_new_threads` | Add a [custom mod message](#configure-the-mod-message) to all new posts in a lemmy community | SUPPORTED :white_check_mark:
 | `mirror_threads`             | Mirror threads from one reddit sub to one lemmy instance       | SUPPORTED :white_check_mark:
 |   TBD                      |  Media Bias/Fact Check comment on new URL threads              | IN PROGRESS :hammer:
+|   TBD                      |  Send an auto-message to users reporting content | IN PROGRESS :hammer:
 
 This project is a hobby project and open to requests. 
 
+| :zap:      Deployed on   |
+|-----------------------------------------|
+| [!exmuslim@lemmy.world](https://lemmy.world/c/exmuslim) | 
+| [!atheismindia@lemmy.world](https://lemmy.world/c/atheismindia) |
 
 ## Prerequisites
 1. [Poetry](https://python-poetry.org/docs/#installation), version 1.6, With Python >=3.9,<3.12
@@ -115,8 +120,9 @@ This is the step where you can configure your bot.
     LEMMY_COMMUNITY="world"
     ```
 
- [!WARNING]  
- Steps 4-9 are only needed the `mirror_threads` task. 
+
+> [!WARNING]  
+> Steps 4-9 are only needed the `mirror_threads` task. 
 
 
 4. **Fill the Reddit variables**  
@@ -186,8 +192,9 @@ This is the step where you can configure your bot.
     | video    | Ignore threads with an uploaded video (not threads linking to a video)         | 
     | url      | Ignore threads with URL links external to Reddit. *Does not ignore image links | 
     | flair    | Ignore threads which has a flair                                               | 
-    | body     | Ignore threads with a text body                                                | 
+    | body     | Ignore threads with only a text (non-image, non-url, non-video) body                                                | 
     | image     | Ignore threads with an image url                                              | 
+    | reddit_gallery | Ignore "reddit gallery" images. This is useful because Reddit galleries don't embed well as links on Lemmy instances and would link to reddit | 
 
     
     For example, to ignore NSFW, pinned, and already-mirrored threads from Reddit, type the names separated by a comma
@@ -232,6 +239,10 @@ This is the step where you can configure your bot.
 
     # the number of new threads to consider for mirroring, default = 30 threads
     REDDIT_FILTER_THREAD_LIMIT=30
+
+    # the number of new threads to mirror, from the list of threads available to mirror
+    # this is useful when complying with lemmy instance regulations that may only allow up to N threads mirrored per day/hour, etc. 
+    REDDIT_CAP_NUMBER_OF_MIRRORED_THREADS=10
     ```
 
 
@@ -257,9 +268,7 @@ docker run lemmy-util-bot:latest
 
 ### Configure the mod message
 
-For `mod_comment_on_new_threads`, edit the markdown `src/mod_comment_new_threads.md` to customize the bot's mod comment to new threads.  
-
-
+For `mod_comment_on_new_threads`, create a markdown file in `src/` named `mod_comment_new_threads.md` to customize the bot's mod comment to new threads. Use the same markdown rules of the lemmy instance you want to deploy the bot on and it should (hopefully) format it correctly. 
 
 ## Deployimg the bot (to Digital Ocean)
 

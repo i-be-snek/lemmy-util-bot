@@ -8,6 +8,7 @@ from praw.reddit import Submission
 from pythorhead import Lemmy
 from pythorhead.types import LanguageType
 from tinydb import TinyDB
+import re
 
 from src.helper import RedditThread, Util
 
@@ -21,7 +22,7 @@ logging.basicConfig(
 def _extract_threads_to_mirror(
     listing: ListingGenerator,
     DB: TinyDB,
-    ignore: list[RedditThread] = [
+    ignore_thread_types: list[RedditThread] = [
         RedditThread.mirrored,
         RedditThread.pinned,
         RedditThread.nsfw,
@@ -31,9 +32,10 @@ def _extract_threads_to_mirror(
         RedditThread.url,
     ],
 ) -> List[dict]:
-    logging.info(f"Ignoring: {', '.join([_.value for _ in ignore])}")
+    logging.info(f"Ignoring: {', '.join([_.value for _ in ignore_thread_types])}")
 
     threads_to_mirror = []
+    reddit_domain = "https://www.reddit.com"
 
     for i in listing:
         ignoring_post = False
@@ -49,6 +51,7 @@ def _extract_threads_to_mirror(
         is_locked: bool = Util._getattr_mod(i, "locked")
         is_video: bool = Util._getattr_mod(i, "is_video")
 
+
         url_attr = Util._getattr_mod(i, "url")
 
         # if the reddit_id is in the url, it's the url to the reddit post
@@ -57,19 +60,31 @@ def _extract_threads_to_mirror(
         url: Union[str, None] = (
             None if reddit_id.split("_", 1)[1] in url_attr else url_attr
         )
+        
+        # add the missing reddit domain if missing in url from api
+        if url is not None: 
+            if url.startswith("/r/"):
+                url = f"{reddit_domain}{url}"
 
+        # check if url is a reddit gallery
+        if url:
+            reddit_gallery: bool = True if re.match("^(https://v.redd.it/)\w+$", url) else False
+        else:
+            reddit_gallery: bool = False
+        
         # check if the url is an image
-        image = Util._check_if_image(url) if url else None
+        image = Util._check_if_image(url) if (url is not None and reddit_gallery is False) else None
 
         # if it is, set the url to None
-        url = None if image is not None else url
+        url = None if (image is not None and reddit_gallery is not False) else url
 
         title: str = getattr(i, "title")
         body_attr = Util._getattr_mod(i, "selftext")
         body: Union[str, None] = None if body_attr == "" else body_attr
-        permalink: str = f"https://www.reddit.com{Util._getattr_mod(i, 'permalink')}"
+        permalink: str = f"{reddit_domain}{Util._getattr_mod(i, 'permalink')}"
         flair: Union[str, None] = Util._getattr_mod(i, "link_flair_text")
         flair = flair.strip() if flair else None
+        only_has_body = True if (body is not None and not url and not image and not is_video) else False
 
         ignore_map = {
             RedditThread.mirrored: is_mirrored,
@@ -78,13 +93,14 @@ def _extract_threads_to_mirror(
             RedditThread.poll: is_poll,
             RedditThread.locked: is_locked,
             RedditThread.video: is_video,
-            RedditThread.url: url,
-            RedditThread.flair: flair,
-            RedditThread.body: body,
+            RedditThread.url: True if url else None,
+            RedditThread.flair: True if flair else None,
+            RedditThread.body: only_has_body,
             RedditThread.image: True if image else None,
+            RedditThread.reddit_gallery: reddit_gallery
         }
 
-        for t in ignore:
+        for t in ignore_thread_types:
             if ignore_map[t]:
                 logging.info(
                     f"Ignoring submission {i.name} with title {i.title}; {t.value} = {ignore_map[t]}"
@@ -109,6 +125,7 @@ def _extract_threads_to_mirror(
                 "is_nsfw": is_nsfw,
                 "is_poll": is_poll,
                 "is_locked": is_locked,
+                "reddit_gallery": reddit_gallery
             }
             logging.info(f"Committing submission {i.name} with title {i.title}")
             threads_to_mirror.append(data)
@@ -121,7 +138,7 @@ def get_threads_from_reddit(
     subreddit_name: str,
     DB: TinyDB,
     limit: int = 100,
-    ignore: list[RedditThread] = [
+    ignore_thread_types: list[RedditThread] = [
         RedditThread.mirrored,
         RedditThread.pinned,
         RedditThread.nsfw,
@@ -161,9 +178,9 @@ def get_threads_from_reddit(
         logging.info(f"Grabbed a list of {filter} threads from Reddit")
 
     threads_to_mirror = _extract_threads_to_mirror(
-        listing=listing, DB=DB, ignore=ignore
+        listing=listing, DB=DB, ignore_thread_types=ignore_thread_types
     )
-    logging.info(f"Found {len(threads_to_mirror)} threads to mirror")
+    logging.info(f"Found {len(threads_to_mirror)} potential threads to mirror")
 
     return threads_to_mirror
 

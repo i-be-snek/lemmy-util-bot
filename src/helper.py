@@ -27,6 +27,7 @@ class RedditThread(Enum):
     flair: str = "flair"
     body: str = "body"
     image: str = "image"
+    reddit_gallery: str = "reddit_gallery"
 
 
 @unique
@@ -219,9 +220,10 @@ class Util:
     def _check_if_image(url: str):
         try:
             resp = requests.head(url)
-            content_type = resp.headers.get("content-type")
-            if "image" in content_type:
-                return url
+            if resp.ok:
+                content_type = resp.headers.get("content-type")
+                if "image" in content_type:
+                    return url
         except Exception as e:
             logging.error(f"Could not check image. {e}")
             return None
