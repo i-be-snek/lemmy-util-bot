@@ -268,9 +268,7 @@ docker run lemmy-util-bot:latest
 
 ### Configure the mod message
 
-For `mod_comment_on_new_threads`, edit the markdown `src/mod_comment_new_threads.md` to customize the bot's mod comment to new threads.  
-
-
+For `mod_comment_on_new_threads`, create a markdown file in `src/` named `mod_comment_new_threads.md` to customize the bot's mod comment to new threads. Use the same markdown rules of the lemmy instance you want to deploy the bot on and it should (hopefully) format it correctly. 
 
 ## Deployimg the bot (to Digital Ocean)
 
