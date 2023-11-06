@@ -61,7 +61,7 @@ class AutoMod:
 
         for i in new_threads:
             # automod saves posts it already commented on
-            if i["saved"] is False:
+            if i["saved"] is False and i["post"]["deleted"] is False:
                 output.append(
                     LemmyThread(
                         i["post"]["deleted"],
