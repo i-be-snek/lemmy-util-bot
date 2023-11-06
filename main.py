@@ -10,6 +10,7 @@ from src.auto_mod import AutoMod
 import praw
 import logging
 from pythorhead import Lemmy
+import random
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(message)s",
@@ -52,8 +53,11 @@ def mirror(
         if not lemmy:
             return
 
+        thread_sample = random.sample(threads, mirror_threads_limit)
+        logging.info(f"Cappting the number of threads to mirror at {mirror_threads_limit}")
+
         mirror_threads_to_lemmy(
-            lemmy, threads[:mirror_threads_limit], config.LEMMY_COMMUNITY, database, mirror_delay
+            lemmy, thread_sample, config.LEMMY_COMMUNITY, database, mirror_delay
         )
 
     # if this is the first mirror job to run
