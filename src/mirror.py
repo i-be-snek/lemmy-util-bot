@@ -78,9 +78,9 @@ def _extract_threads_to_mirror(
             RedditThread.poll: is_poll,
             RedditThread.locked: is_locked,
             RedditThread.video: is_video,
-            RedditThread.url: url,
-            RedditThread.flair: flair,
-            RedditThread.body: body,
+            RedditThread.url: True if url else None,
+            RedditThread.flair: True if flair else None,
+            RedditThread.body: True if body else None,
             RedditThread.image: True if image else None,
         }
 
