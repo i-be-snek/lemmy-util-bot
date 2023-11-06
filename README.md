@@ -192,8 +192,9 @@ This is the step where you can configure your bot.
     | video    | Ignore threads with an uploaded video (not threads linking to a video)         | 
     | url      | Ignore threads with URL links external to Reddit. *Does not ignore image links | 
     | flair    | Ignore threads which has a flair                                               | 
-    | body     | Ignore threads with a text body                                                | 
+    | body     | Ignore threads with only a text (non-image, non-url, non-video) body                                                | 
     | image     | Ignore threads with an image url                                              | 
+    | reddit_gallery | Ignore "reddit gallery" images. This is useful because Reddit galleries don't embed well as links on Lemmy instances and would link to reddit | 
 
     
     For example, to ignore NSFW, pinned, and already-mirrored threads from Reddit, type the names separated by a comma
@@ -238,6 +239,10 @@ This is the step where you can configure your bot.
 
     # the number of new threads to consider for mirroring, default = 30 threads
     REDDIT_FILTER_THREAD_LIMIT=30
+
+    # the number of new threads to mirror, from the list of threads available to mirror
+    # this is useful when complying with lemmy instance regulations that may only allow up to N threads mirrored per day/hour, etc. 
+    REDDIT_CAP_NUMBER_OF_MIRRORED_THREADS=10
     ```
 
 
