@@ -76,7 +76,7 @@ jobs:
 
   deploy:
     if: github.ref == 'refs/heads/main'
-    needs: build
+    # needs: build
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
