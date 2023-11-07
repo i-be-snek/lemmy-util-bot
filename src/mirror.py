@@ -1,4 +1,5 @@
 import logging
+import re
 from time import sleep
 from typing import List, Union
 
@@ -8,7 +9,6 @@ from praw.reddit import Submission
 from pythorhead import Lemmy
 from pythorhead.types import LanguageType
 from tinydb import TinyDB
-import re
 
 from src.helper import RedditThread, Util
 
@@ -51,7 +51,6 @@ def _extract_threads_to_mirror(
         is_locked: bool = Util._getattr_mod(i, "locked")
         is_video: bool = Util._getattr_mod(i, "is_video")
 
-
         url_attr = Util._getattr_mod(i, "url")
 
         # if the reddit_id is in the url, it's the url to the reddit post
@@ -60,20 +59,26 @@ def _extract_threads_to_mirror(
         url: Union[str, None] = (
             None if reddit_id.split("_", 1)[1] in url_attr else url_attr
         )
-        
+
         # add the missing reddit domain if missing in url from api
-        if url is not None: 
+        if url is not None:
             if url.startswith("/r/"):
                 url = f"{reddit_domain}{url}"
 
         # check if url is a reddit gallery
         if url:
-            reddit_gallery: bool = True if re.match("^(https://v.redd.it/)\w+$", url) else False
+            reddit_gallery: bool = (
+                True if re.match("^(https://v.redd.it/)\w+$", url) else False
+            )
         else:
             reddit_gallery: bool = False
-        
+
         # check if the url is an image
-        image = Util._check_if_image(url) if (url is not None and reddit_gallery is False) else None
+        image = (
+            Util._check_if_image(url)
+            if (url is not None and reddit_gallery is False)
+            else None
+        )
 
         # if it is, set the url to None
         url = None if (image is not None and reddit_gallery is not False) else url
@@ -84,7 +89,11 @@ def _extract_threads_to_mirror(
         permalink: str = f"{reddit_domain}{Util._getattr_mod(i, 'permalink')}"
         flair: Union[str, None] = Util._getattr_mod(i, "link_flair_text")
         flair = flair.strip() if flair else None
-        only_has_body = True if (body is not None and not url and not image and not is_video) else False
+        only_has_body = (
+            True
+            if (body is not None and not url and not image and not is_video)
+            else False
+        )
 
         ignore_map = {
             RedditThread.mirrored: is_mirrored,
@@ -97,7 +106,7 @@ def _extract_threads_to_mirror(
             RedditThread.flair: True if flair else None,
             RedditThread.body: only_has_body,
             RedditThread.image: True if image else None,
-            RedditThread.reddit_gallery: reddit_gallery
+            RedditThread.reddit_gallery: reddit_gallery,
         }
 
         for t in ignore_thread_types:
@@ -125,7 +134,7 @@ def _extract_threads_to_mirror(
                 "is_nsfw": is_nsfw,
                 "is_poll": is_poll,
                 "is_locked": is_locked,
-                "reddit_gallery": reddit_gallery
+                "reddit_gallery": reddit_gallery,
             }
             logging.info(f"Committing submission {i.name} with title {i.title}")
             threads_to_mirror.append(data)
@@ -211,7 +220,7 @@ def mirror_threads_to_lemmy(
 
             # add flair if it exists
             thread_title = (
-                f"{thread['flair']} {thread['title']}"
+                f"{thread['flair']} | {thread['title']}"
                 if thread["flair"]
                 else thread["title"]
             )
