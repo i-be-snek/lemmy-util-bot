@@ -20,7 +20,7 @@ class TestClassHelper:
         Config(items.full_config)
 
     def test_check_configs_ignore_list(self):
-        assert Config(items.full_config).THREADS_TO_IGNORE == [
+        assert Config(items.full_config).REDDIT_THREADS_TO_IGNORE == [
             RedditThread.mirrored,
             RedditThread.pinned,
             RedditThread.nsfw,

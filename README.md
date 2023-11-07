@@ -97,7 +97,7 @@ This is the step where you can configure your bot.
     FILESTACK_APP_SECRET=
     FILESTACK_HANDLE_REFRESH=
     FILESTACK_HANDLE_BACKUP=
-    THREADS_TO_IGNORE=
+    REDDIT_THREADS_TO_IGNORE=
     FILTER_BY=
     ```
     
@@ -200,7 +200,7 @@ This is the step where you can configure your bot.
     For example, to ignore NSFW, pinned, and already-mirrored threads from Reddit, type the names separated by a comma
     
     ```shell
-    THREADS_TO_IGNORE="mirrored,pinned,nsfw"
+    REDDIT_THREADS_TO_IGNORE="mirrored,pinned,nsfw"
     ```
 
 8. Confirm that all vital environment variables are present in `.env` by running this pythohon test:

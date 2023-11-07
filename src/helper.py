@@ -48,7 +48,7 @@ class Config:
     )
 
     mirror_configs: tuple = (
-        "THREADS_TO_IGNORE",
+        "REDDIT_THREADS_TO_IGNORE",
         "REDDIT_CLIENT_ID",
         "REDDIT_CLIENT_SECRET",
         "REDDIT_PASSWORD",
@@ -108,12 +108,15 @@ class Config:
             self.FILESTACK_APP_SECRET: str = self.config["FILESTACK_APP_SECRET"]
             self.FILESTACK_HANDLE_REFRESH: str = self.config["FILESTACK_HANDLE_REFRESH"]
             self.FILESTACK_HANDLE_BACKUP: str = self.config["FILESTACK_HANDLE_BACKUP"]
-            self.THREADS_TO_IGNORE: list = [
+
+            self.REDDIT_THREADS_TO_IGNORE: list = [
                 Util._getattr_mod(RedditThread, x)
-                for x in Util._get_clean_list(self.config["THREADS_TO_IGNORE"])
+                for x in Util._get_clean_list(self.config["REDDIT_THREADS_TO_IGNORE"])
             ]
-            self.THREADS_TO_IGNORE = (
-                self.THREADS_TO_IGNORE if self.THREADS_TO_IGNORE != [""] else []
+            self.REDDIT_THREADS_TO_IGNORE = (
+                self.REDDIT_THREADS_TO_IGNORE
+                if self.REDDIT_THREADS_TO_IGNORE != [""]
+                else []
             )
             self.BACKUP_FILESTACK_EVERY_HOUR: int = int(
                 self.config.get("BACKUP_FILESTACK_EVERY_HOUR", 36)
@@ -121,9 +124,7 @@ class Config:
             self.REFRESH_FILESTACK_EVERY_MINUTE: int = int(
                 self.config.get("REFRESH_FILESTACK_EVERY_MINUTE", 30)
             )
-            self.MIRROR_THREADS_EVERY_SECOND: int = int(
-                self.config.get("MIRROR_THREADS_EVERY_SECOND", 60)
-            )
+
             self.DELAY_BETWEEN_MIRRORED_THREADS_SECOND: int = int(
                 self.config.get("DELAY_BETWEEN_MIRRORED_THREADS_SECOND", 60)
             )
