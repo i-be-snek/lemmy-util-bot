@@ -30,6 +30,7 @@ full_config = OrderedDict(
         "FILESTACK_HANDLE_BACKUP": "GAbC0wsdfDacYQadaS",
         "REDDIT_THREADS_TO_IGNORE": "mirrored,pinned,nsfw",
         "TASKS": "mirror_threads, mod_comment_on_new_threads",
+        "REDDIT_MIRROR_SCHEDULE_TYPE": "daily",
     }
 )
 thread = {

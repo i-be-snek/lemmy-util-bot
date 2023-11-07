@@ -4,13 +4,14 @@ import schedule
 import os
 
 from src.auth import lemmy_auth, reddit_oauth
-from src.helper import Config, DataBase, Task
+from src.helper import Config, DataBase, Task, ScheduleType
 from src.mirror import get_threads_from_reddit, mirror_threads_to_lemmy
 from src.auto_mod import AutoMod
 import praw
 import logging
 from pythorhead import Lemmy
 import random
+import pytz
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(message)s",
@@ -41,7 +42,7 @@ def mirror(
         config.REDDIT_SUBREDDIT,
         database,
         limit=reddit_filter_limit,
-        ignore_thread_types=config.THREADS_TO_IGNORE,
+        ignore_thread_types=config.REDDIT_THREADS_TO_IGNORE,
         filter=filter,
     )
 
@@ -93,10 +94,10 @@ if __name__ == "__main__":
     if Task.mirror_threads in config.TASKS:
         backup_h = config.BACKUP_FILESTACK_EVERY_HOUR
         refresh_m = config.REFRESH_FILESTACK_EVERY_MINUTE
-        mirror_s = config.MIRROR_THREADS_EVERY_SECOND
         mirror_delay_s = config.DELAY_BETWEEN_MIRRORED_THREADS_SECOND
         filter_limit = config.REDDIT_FILTER_THREAD_LIMIT
         reddit_cap = config.REDDIT_CAP_NUMBER_OF_MIRRORED_THREADS
+        schedule_type = config.REDDIT_MIRROR_SCHEDULE_TYPE
 
         # get latest backup of the database
         database_path = "data/mirrored_threads.json"
@@ -116,30 +117,47 @@ if __name__ == "__main__":
         # authenticate with reddit once at the beginning
         reddit = reddit_oauth(config)
 
-        # if threads exist, authenticate with lemmy and mirror threads
-        schedule.every(mirror_s).seconds.do(
-            mirror,
-            reddit=reddit,
-            database=database,
-            mirror_threads_limit=reddit_cap,
-            filter=config.FILTER_BY,
-            reddit_filter_limit=filter_limit,
-            mirror_delay=mirror_delay_s,
-        )
+        if schedule_type == ScheduleType.daily:
+            time_utc = config.MIRROR_EVERY_DAY_AT
+            # schedule to mirror every day at {time_utc}
+            schedule.every().day.at(time_utc, "UTC").do(
+                mirror,
+                reddit=reddit,
+                database=database,
+                mirror_threads_limit=reddit_cap,
+                filter=config.FILTER_BY,
+                reddit_filter_limit=filter_limit,
+                mirror_delay=mirror_delay_s,
+                cancel_after_first_run=False,
+            )
+        elif schedule_type == ScheduleType.every_x_seconds:
 
-        # the scheduler will run the first job after {mirror_s} seconds
-        # but for the bot to activate immediately, we can run the function
-        # first as a separate job and cancel it after the first run
-        schedule.every().seconds.do(
-            mirror,
-            reddit=reddit,
-            database=database,
-            mirror_threads_limit=reddit_cap,
-            filter=config.FILTER_BY,
-            reddit_filter_limit=filter_limit,
-            mirror_delay=mirror_delay_s,
-            cancel_after_first_run=True,
-        )
+            # schedule to mirror every {mirror_s} seconds
+            mirror_s = config.MIRROR_THREADS_EVERY_SECOND
+            schedule.every(mirror_s).seconds.do(
+                mirror,
+                reddit=reddit,
+                database=database,
+                mirror_threads_limit=reddit_cap,
+                filter=config.FILTER_BY,
+                reddit_filter_limit=filter_limit,
+                mirror_delay=mirror_delay_s,
+                cancel_after_first_run=False,
+            )
+
+            # the scheduler will run the first job after {mirror_s} seconds
+            # but for the bot to activate immediately, we can run the function
+            # first as a separate job and cancel it after the first run
+            schedule.every().seconds.do(
+                mirror,
+                reddit=reddit,
+                database=database,
+                mirror_threads_limit=reddit_cap,
+                filter=config.FILTER_BY,
+                reddit_filter_limit=filter_limit,
+                mirror_delay=mirror_delay_s,
+                cancel_after_first_run=True,
+            )
 
         # refresh the database file in filestack
         schedule.every(refresh_m).minutes.do(

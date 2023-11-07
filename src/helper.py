@@ -36,6 +36,12 @@ class Task(Enum):
     mod_comment_on_new_threads: str = "mod_comment_on_new_threads"
 
 
+@unique
+class ScheduleType(Enum):
+    daily: str = "daily"
+    every_x_seconds: str = "every_x_seconds"
+
+
 @dataclass
 class Config:
     config: dict
@@ -59,6 +65,7 @@ class Config:
         "FILESTACK_APP_SECRET",
         "FILESTACK_HANDLE_REFRESH",
         "FILESTACK_HANDLE_BACKUP",
+        "REDDIT_MIRROR_SCHEDULE_TYPE",
     )
 
     configs_with_defaults: tuple = (
@@ -69,6 +76,7 @@ class Config:
         "REDDIT_FILTER_THREAD_LIMIT",
         "FILTER_BY",
         "REDDIT_CAP_NUMBER_OF_MIRRORED_THREADS",
+        "MIRROR_EVERY_DAY_AT",
     )
     keys_missing: bool = False
 
@@ -82,6 +90,8 @@ class Config:
             Util._getattr_mod(Task, x)
             for x in Util._get_clean_list(self.config["TASKS"])
         ]
+
+        assert self.TASKS != [""]
 
         if Task.mirror_threads in self.TASKS:
             for c in self.mirror_configs:
@@ -136,6 +146,22 @@ class Config:
             )
 
             self.FILTER_BY: str = self.config.get("FILTER_BY", "new")
+
+            self.REDDIT_MIRROR_SCHEDULE_TYPE: str = Util._getattr_mod(
+                ScheduleType, self.config["REDDIT_MIRROR_SCHEDULE_TYPE"]
+            )
+
+            if self.REDDIT_MIRROR_SCHEDULE_TYPE == ScheduleType.daily:
+                self.MIRROR_EVERY_DAY_AT: str = self.config.get(
+                    "MIRROR_EVERY_DAY_AT", "12:30"
+                )
+                self.MIRROR_THREADS_EVERY_SECOND = None
+
+            elif self.REDDIT_MIRROR_SCHEDULE_TYPE == ScheduleType.every_x_seconds:
+                self.MIRROR_THREADS_EVERY_SECOND: int = int(
+                    self.config.get("MIRROR_THREADS_EVERY_SECOND", 60 * 5)
+                )
+                self.MIRROR_EVERY_DAY_AT = None
 
 
 class FileUploadError(Exception):
