@@ -70,7 +70,7 @@ This is the step where you can configure your bot.
 > Steps 4-8 are only needed the `mirror_threads` task. 
 
 
-1. Create a new text file named ".env" in the root directory of the repo
+1. Create a new text file named `.env` in the root directory of the repo
 
     ```shell
     touch .env
@@ -181,7 +181,7 @@ This is the step where you can configure your bot.
     2023-10-29 08:17:40 INFO     Uploading file mirrored_threads_backup.json to https://cdn.filestackcontent.com/GAbC0wsdfDacYQadaS with handle GAbC0wsdfDacYQadaS.
 
 
-    Add these variables to the .env file
+    Add these variables to the `.env` file
     FILESTACK_HANDLE_REFRESH="LIbC0wBfsAzs62QadcDrZ"
     FILESTACK_HANDLE_BACKUP="GAbC0wsdfDacYQadaS"
     ```
@@ -221,7 +221,7 @@ This is the step where you can configure your bot.
     ```
 
 
-8. You configure the scheduling times by adding these to the .env file (otherwise the script falls back to its defaults):
+8. You configure the scheduling times by adding these to the `.env` file (otherwise the script falls back to its defaults):
 
     ```shell
     # how long to wait in hours before making a backup of the filestack database, default = 36 (hours)
@@ -262,12 +262,7 @@ This is the step where you can configure your bot.
 
 ### (C) Build the docker image
 
-Now that the `.env`` file is ready, we can build and run the docker image.
-
-
-```
-set -a; source .env; set +a
-```
+Now that the `.env` file is ready, we can build and run the docker image.
 
 ```shell
 # build the docker image and add a tag
