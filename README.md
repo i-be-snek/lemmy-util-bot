@@ -119,10 +119,10 @@ This is the step where you can configure your bot.
     The first four are easy.
     At this point, it's recommended to create a new lemmy account that is clearly marked as a bot. `LEMMY_USERNAME` should not include `u/`. The URL to the lemmy instance `LEMMY_INSTANCE` should include `https://`. The `LEMMY_COMMUNITY` is the target community where the bot will be able to write threads. Do not include `c/` in the community name. Example:
     ```shell
-    LEMMY_USERNAME="AweSomeUser65"
-    LEMMY_PASSWORD="somePassWord"
-    LEMMY_INSTANCE="https://lemmy.world"
-    LEMMY_COMMUNITY="world"
+    LEMMY_USERNAME=AweSomeUser65
+    LEMMY_PASSWORD=somePassWord
+    LEMMY_INSTANCE=https://lemmy.world
+    LEMMY_COMMUNITY=world
     ```
 
     The `LEMMY_MOD_MESSAGE_NEW_THREADS` is a custom message to post on each new thread in your lemmy community. If it spans over several new lines, replace the new lines with `\n\n`. Use the same markdown rules of the lemmy instance you want to deploy the bot on and it should (hopefully) format it correctly. 
@@ -147,12 +147,12 @@ This is the step where you can configure your bot.
     ![](media/reddit_client_id_and_secret.png)
 
     ```shell
-    REDDIT_USERNAME="MagnificentPotato"
-    REDDIT_PASSWORD="somePassWord"
-    REDDIT_CLIENT_ID="Fsh7AEAbXkpmiK0aseA93bjd7"
-    REDDIT_CLIENT_SECRET="YfT586Ew9w8462SdvSSHh6G4dN07A"
-    REDDIT_USER_AGENT="util bot u/MagnificentPotato"
-    REDDIT_SUBREDDIT="all"
+    REDDIT_USERNAME=MagnificentPotato
+    REDDIT_PASSWORD=somePassWord
+    REDDIT_CLIENT_ID=Fsh7AEAbXkpmiK0aseA93bjd7
+    REDDIT_CLIENT_SECRET=YfT586Ew9w8462SdvSSHh6G4dN07A
+    REDDIT_USER_AGENT=util bot u/MagnificentPotato
+    REDDIT_SUBREDDIT=all
     ```
 
 5. To be able to store and backup a small database with all the reddit threads the bot has already mirrored, [create a free Filestack account](https://dev.filestack.com/signup/free/). The database that keeps getting updated by the bot will be stored there so that the bot avoids cluttering lemmy with threads that have already been mirrored. It also ensures that the data is backed up somewhere.
@@ -162,8 +162,8 @@ This is the step where you can configure your bot.
     ![](media/filestack.png)
     
     ```shell
-    FILESTACK_API_KEY="A6i4yasdRR0mJadJp0o8jdWA"
-    FILESTACK_APP_SECRET="2XTBUKJHHRFUN6KC62UV5MPY5Y"
+    FILESTACK_API_KEY=A6i4yasdRR0mJadJp0o8jdWA
+    FILESTACK_APP_SECRET=2XTBUKJHHRFUN6KC62UV5MPY5Y
     ```
 
 6. The Filestack backups will always overwrite an already-existing file. This is because Filestack only allows 500 files to be uploaded for free, so overwriting them ensures being able to use it for free. `FILESTACK_HANDLE_REFRESH` will be the "handle" (or ID) of a copy of the database that the bot will overwrite frequently (such as every 5 minutes or every hour). `FILESTACK_HANDLE_BACKUP`, on the other hand, is a backup copy that the bot overwrites every few days, as an additional "just in case" backup. To automatically upload these files and get the handle, run this dedicated python script in the root directory:
@@ -177,13 +177,12 @@ This is the step where you can configure your bot.
     Once done, the output should be similar to this:
 
     ```shell
-    2023-10-29 08:17:38 INFO     Uploading file mirrored_threads_refresh.json to https://cdn.filestackcontent.com/LIbC0wBfsAzs62QadcDrZ with handle LIbC0wBfsAzs62QadcDrZ.
-    2023-10-29 08:17:40 INFO     Uploading file mirrored_threads_backup.json to https://cdn.filestackcontent.com/GAbC0wsdfDacYQadaS with handle GAbC0wsdfDacYQadaS.
-
+    2023-10-29 08:17:38 INFO     Uploading file mirrored_threads_refresh.json to https://cdn.filestackcontent.com/LIAzs62QadbC0wBfscDrZ with handle LIAzs62QadbC0wBfscDrZ.
+    2023-10-29 08:17:40 INFO     Uploading file mirrored_threads_backup.json to https://cdn.filestackcontent.com/GAbfDacYQaC0wsddaS with handle GAbfDacYQaC0wsddaS.
 
     Add these variables to the `.env` file
-    FILESTACK_HANDLE_REFRESH="LIbC0wBfsAzs62QadcDrZ"
-    FILESTACK_HANDLE_BACKUP="GAbC0wsdfDacYQadaS"
+    FILESTACK_HANDLE_REFRESH=LIAzs62QadbC0wBfscDrZ
+    FILESTACK_HANDLE_BACKUP=GAbfDacYQaC0wsddaS
     ```
 
     To confirm that the files have been uploaded, sign in to [dev.filestack](https://dev.filestack.com) and navigate to `Content Browser`. There you should be able to view the files just uploaded by the python script.
@@ -211,13 +210,13 @@ This is the step where you can configure your bot.
     For example, to ignore NSFW, pinned, and already-mirrored threads from Reddit, type the names separated by a comma
     
     ```shell
-    REDDIT_THREADS_TO_IGNORE="mirrored,pinned,nsfw"
+    REDDIT_THREADS_TO_IGNORE=mirrored,pinned,nsfw
     ```
 
     I recommend these settings to avoid mod posts, pinned posts, and reddit gallery posts that don't render so nicely on the lemmy ui:
 
     ```
-    REDDIT_THREADS_TO_IGNORE="mirrored,pinned,nsfw,poll,locked,video,reddit_gallery"
+    REDDIT_THREADS_TO_IGNORE=mirrored,pinned,nsfw,poll,locked,video,reddit_gallery
     ```
 
 
@@ -254,7 +253,7 @@ This is the step where you can configure your bot.
     #### Scheduling Option 2: If you want the bot to only post once a day, you can specify this in UCT time:
 
     ```shell
-    MIRROR_EVERY_DAY_AT="12:30"
+    MIRROR_EVERY_DAY_AT=12:30
 
     # make sure to add this for the bot to use the daily mirroring option
     MIRROR_THREADS_EVERY_SECOND=False
