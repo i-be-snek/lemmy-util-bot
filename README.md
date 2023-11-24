@@ -235,30 +235,30 @@ This is the step where you can configure your bot.
     # this is useful when complying with lemmy instance regulations that may only allow up to N threads mirrored per day/hour, etc. 
     REDDIT_CAP_NUMBER_OF_MIRRORED_THREADS=10
 
+    # the number of new threads to consider for mirroring, default = 30 threads
+    REDDIT_FILTER_THREAD_LIMIT=30
+
     ```
     
     #### Scheduling Option 1: If you want to mirror threads every X seconds, use these settings:
 
-    ```
+    ```shell
     # schedule the mirror script to run every X seconds (to comply with the Lemmy instance rules or 
     # avoid reposting every second, for example), default = 60 (seconds)
     MIRROR_THREADS_EVERY_SECOND=60
 
     # add a delay between each thread mirrored to Lemmy, default = 60 (seconds)
     DELAY_BETWEEN_MIRRORED_THREADS_SECOND=60
-
-    # the number of new threads to consider for mirroring, default = 30 threads
-    REDDIT_FILTER_THREAD_LIMIT=30
-
     ```
 
     #### Scheduling Option 2: If you want the bot to only post once a day, you can specify this in UCT time:
 
-    ```
+    ```shell
     MIRROR_EVERY_DAY_AT="12:30"
+
+    # make sure to add this for the bot to use the daily mirroring option
+    MIRROR_THREADS_EVERY_SECOND=False
     ```
-
-
 
 ### (C) Build the docker image
 
