@@ -77,7 +77,8 @@ def raiseError(e):
 
 if __name__ == "__main__":
     # get config
-    config = Config(dotenv_values(".env"))
+    env_values = dict(os.environ)
+    config = Config(env_values)
     needs_database = [Task.mirror_threads]
 
     # authenticate with lemmy
