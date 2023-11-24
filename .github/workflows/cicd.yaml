@@ -7,51 +7,16 @@ on:
     branches:
     - main
 
-env:
-  DO_image: registry.digitalocean.com/reddit-lemmy-mirror-bot/mirror-script-exmuslim:latest
-
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-    - name: Make dotenv file
-      uses: SpicyPizza/create-envfile@v2.0
-      with:
-        envkey_LEMMY_USERNAME: ${{ secrets.LEMMY_USERNAME }}
-        envkey_LEMMY_PASSWORD: ${{ secrets.LEMMY_PASSWORD }}
-        envkey_LEMMY_INSTANCE: ${{ secrets.LEMMY_INSTANCE }}
-        envkey_LEMMY_COMMUNITY: ${{ secrets.LEMMY_COMMUNITY }}
-        envkey_REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
-        envkey_REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
-        envkey_REDDIT_PASSWORD: ${{ secrets.REDDIT_PASSWORD }}
-        envkey_REDDIT_USER_AGENT: ${{ secrets.REDDIT_USER_AGENT }}
-        envkey_REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}
-        envkey_REDDIT_SUBREDDIT: ${{ secrets.REDDIT_SUBREDDIT }}
-        envkey_DIGITAL_OCEAN_TOKEN: ${{ secrets.DIGITAL_OCEAN_TOKEN }}
-        envkey_FILESTACK_API_KEY: ${{ secrets.FILESTACK_API_KEY }}
-        envkey_FILESTACK_APP_SECRET: ${{ secrets.FILESTACK_APP_SECRET }}
-        envkey_FILESTACK_HANDLE_REFRESH: ${{ secrets.FILESTACK_HANDLE_REFRESH }}
-        envkey_FILESTACK_HANDLE_BACKUP: ${{ secrets.FILESTACK_HANDLE_BACKUP }}
-        envkey_THREADS_TO_IGNORE: ${{ secrets.THREADS_TO_IGNORE }}
-        envkey_BACKUP_FILESTACK_EVERY_HOUR: ${{ secrets.BACKUP_FILESTACK_EVERY_HOUR }}
-        envkey_REFRESH_FILESTACK_EVERY_MINUTE: ${{ secrets.REFRESH_FILESTACK_EVERY_MINUTE }}
-        envkey_MIRROR_THREADS_EVERY_SECOND: ${{ secrets.MIRROR_THREADS_EVERY_SECOND }}
-        envkey_DELAY_BETWEEN_MIRRORED_THREADS_SECOND: ${{ secrets.DELAY_BETWEEN_MIRRORED_THREADS_SECOND }}
-        envkey_REDDIT_FILTER_THREAD_LIMIT: ${{ secrets.REDDIT_FILTER_THREAD_LIMIT }}
-        envkey_FILTER_BY: ${{ secrets.FILTER_BY }}
-        envkey_TASKS: ${{ secrets.TASKS }}
-        envkey_REDDIT_CAP_NUMBER_OF_MIRRORED_THREADS: ${{ secrets.REDDIT_CAP_NUMBER_OF_MIRRORED_THREADS }}
-
-        file_name: .env
-        fail_on_empty: true
-        sort_keys: false
     - name: Build image
-      run: docker build -t "${DO_image}" .
+      run: docker build -t "${{ secrets.DO_image }}" .
     - name: Save Docker image
-      run: docker save --output image.tar "${DO_image}"
+      run: docker save --output image.tar "${{ secrets.DO_image }}"
     - name: Upload docker image artifact
       uses: actions/upload-artifact@v3
       with:
@@ -80,4 +45,4 @@ jobs:
     - name: Log into Digital Ocean Container Registry
       run: doctl registry login --expiry-seconds 600
     - name: Push image to Digital Ocean Container Registry
-      run: docker push "${DO_image}"
+      run: docker push "${{ secrets.DO_image }}"

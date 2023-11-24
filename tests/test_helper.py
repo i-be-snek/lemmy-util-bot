@@ -6,14 +6,8 @@ from filestack import Client, Filelink
 from filestack.exceptions import FilestackHTTPError
 from tinydb import TinyDB
 
-from src.helper import (
-    Config,
-    DataBase,
-    FileDownloadError,
-    FileUploadError,
-    RedditThread,
-    Util,
-)
+from src.helper import (Config, DataBase, FileDownloadError, FileUploadError,
+                        RedditThread, Util)
 from tests import items
 
 
@@ -26,16 +20,11 @@ class TestClassHelper:
         Config(items.full_config)
 
     def test_check_configs_ignore_list(self):
-        assert Config(items.full_config).THREADS_TO_IGNORE == [
+        assert Config(items.full_config).REDDIT_THREADS_TO_IGNORE == [
             RedditThread.mirrored,
             RedditThread.pinned,
             RedditThread.nsfw,
         ]
-
-    def test_check_prod_configs(self):
-        from dotenv import dotenv_values
-
-        assert Config(dotenv_values(".env"))
 
 
 @pytest.mark.parametrize("test_filestack", [DataBase("tests/filestack_tests.txt")])

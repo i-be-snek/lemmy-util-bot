@@ -28,8 +28,10 @@ full_config = OrderedDict(
         "FILESTACK_APP_SECRET": "2XTBUKJHHRFUN6KC62UV5MPY5Y",
         "FILESTACK_HANDLE_REFRESH": "LIbC0wBfsAzs62QadcDrZ",
         "FILESTACK_HANDLE_BACKUP": "GAbC0wsdfDacYQadaS",
-        "THREADS_TO_IGNORE": "mirrored,pinned,nsfw",
+        "REDDIT_THREADS_TO_IGNORE": "mirrored,pinned,nsfw",
         "TASKS": "mirror_threads, mod_comment_on_new_threads",
+        "REDDIT_MIRROR_SCHEDULE_TYPE": "daily",
+        "LEMMY_MOD_MESSAGE_NEW_THREADS": "hello from the mod bot!",
     }
 )
 thread = {

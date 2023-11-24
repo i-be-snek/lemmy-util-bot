@@ -36,6 +36,12 @@ class Task(Enum):
     mod_comment_on_new_threads: str = "mod_comment_on_new_threads"
 
 
+@unique
+class ScheduleType(Enum):
+    daily: str = "daily"
+    every_x_seconds: str = "every_x_seconds"
+
+
 @dataclass
 class Config:
     config: dict
@@ -45,10 +51,11 @@ class Config:
         "LEMMY_INSTANCE",
         "LEMMY_COMMUNITY",
         "TASKS",
+        "LEMMY_MOD_MESSAGE_NEW_THREADS",
     )
 
     mirror_configs: tuple = (
-        "THREADS_TO_IGNORE",
+        "REDDIT_THREADS_TO_IGNORE",
         "REDDIT_CLIENT_ID",
         "REDDIT_CLIENT_SECRET",
         "REDDIT_PASSWORD",
@@ -59,6 +66,7 @@ class Config:
         "FILESTACK_APP_SECRET",
         "FILESTACK_HANDLE_REFRESH",
         "FILESTACK_HANDLE_BACKUP",
+        "FILESTACK_HANDLE_MOD_MESSAGE" "REDDIT_MIRROR_SCHEDULE_TYPE",
     )
 
     configs_with_defaults: tuple = (
@@ -69,6 +77,7 @@ class Config:
         "REDDIT_FILTER_THREAD_LIMIT",
         "FILTER_BY",
         "REDDIT_CAP_NUMBER_OF_MIRRORED_THREADS",
+        "MIRROR_EVERY_DAY_AT",
     )
     keys_missing: bool = False
 
@@ -83,6 +92,8 @@ class Config:
             for x in Util._get_clean_list(self.config["TASKS"])
         ]
 
+        assert self.TASKS != [""]
+
         if Task.mirror_threads in self.TASKS:
             for c in self.mirror_configs:
                 if c not in self.mirror_configs:
@@ -96,6 +107,9 @@ class Config:
         self.LEMMY_PASSWORD: str = self.config["LEMMY_PASSWORD"]
         self.LEMMY_INSTANCE: str = self.config["LEMMY_INSTANCE"]
         self.LEMMY_COMMUNITY: str = self.config["LEMMY_COMMUNITY"]
+        self.LEMMY_MOD_MESSAGE_NEW_THREADS: str = self.config[
+            "LEMMY_MOD_MESSAGE_NEW_THREADS"
+        ]
 
         if Task.mirror_threads in self.TASKS:
             self.REDDIT_CLIENT_ID: str = self.config["REDDIT_CLIENT_ID"]
@@ -108,12 +122,15 @@ class Config:
             self.FILESTACK_APP_SECRET: str = self.config["FILESTACK_APP_SECRET"]
             self.FILESTACK_HANDLE_REFRESH: str = self.config["FILESTACK_HANDLE_REFRESH"]
             self.FILESTACK_HANDLE_BACKUP: str = self.config["FILESTACK_HANDLE_BACKUP"]
-            self.THREADS_TO_IGNORE: list = [
+
+            self.REDDIT_THREADS_TO_IGNORE: list = [
                 Util._getattr_mod(RedditThread, x)
-                for x in Util._get_clean_list(self.config["THREADS_TO_IGNORE"])
+                for x in Util._get_clean_list(self.config["REDDIT_THREADS_TO_IGNORE"])
             ]
-            self.THREADS_TO_IGNORE = (
-                self.THREADS_TO_IGNORE if self.THREADS_TO_IGNORE != [""] else []
+            self.REDDIT_THREADS_TO_IGNORE = (
+                self.REDDIT_THREADS_TO_IGNORE
+                if self.REDDIT_THREADS_TO_IGNORE != [""]
+                else []
             )
             self.BACKUP_FILESTACK_EVERY_HOUR: int = int(
                 self.config.get("BACKUP_FILESTACK_EVERY_HOUR", 36)
@@ -121,9 +138,7 @@ class Config:
             self.REFRESH_FILESTACK_EVERY_MINUTE: int = int(
                 self.config.get("REFRESH_FILESTACK_EVERY_MINUTE", 30)
             )
-            self.MIRROR_THREADS_EVERY_SECOND: int = int(
-                self.config.get("MIRROR_THREADS_EVERY_SECOND", 60)
-            )
+
             self.DELAY_BETWEEN_MIRRORED_THREADS_SECOND: int = int(
                 self.config.get("DELAY_BETWEEN_MIRRORED_THREADS_SECOND", 60)
             )
@@ -135,6 +150,22 @@ class Config:
             )
 
             self.FILTER_BY: str = self.config.get("FILTER_BY", "new")
+
+            self.REDDIT_MIRROR_SCHEDULE_TYPE: str = Util._getattr_mod(
+                ScheduleType, self.config["REDDIT_MIRROR_SCHEDULE_TYPE"]
+            )
+
+            if self.REDDIT_MIRROR_SCHEDULE_TYPE == ScheduleType.daily:
+                self.MIRROR_EVERY_DAY_AT: str = self.config.get(
+                    "MIRROR_EVERY_DAY_AT", "12:30"
+                )
+                self.MIRROR_THREADS_EVERY_SECOND = None
+
+            elif self.REDDIT_MIRROR_SCHEDULE_TYPE == ScheduleType.every_x_seconds:
+                self.MIRROR_THREADS_EVERY_SECOND: int = int(
+                    self.config.get("MIRROR_THREADS_EVERY_SECOND", 60 * 5)
+                )
+                self.MIRROR_EVERY_DAY_AT = None
 
 
 class FileUploadError(Exception):
