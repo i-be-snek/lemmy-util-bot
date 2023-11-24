@@ -70,7 +70,7 @@ def mirror(
 
 def automod_comment_on_new_threads(config: dict, lemmy: Lemmy):
     auto_mod = AutoMod(lemmy, config.LEMMY_COMMUNITY, config.LEMMY_USERNAME)
-    auto_mod.comment_on_new_threads()
+    auto_mod.comment_on_new_threads(mod_message=config.LEMMY_MOD_MESSAGE_NEW_THREADS)
 
 
 def raiseError(e):
@@ -134,7 +134,7 @@ if __name__ == "__main__":
                 cancel_after_first_run=False,
             )
             logging.info(
-                f"TASK: Mirroring threads every every dat at {time_utc} UTC with a delay of {mirror_delay_s} seconds between threads"
+                f"TASK: Mirroring threads every every day at {time_utc} UTC with a delay of {mirror_delay_s} seconds between threads"
             )
         elif schedule_type == ScheduleType.every_x_seconds:
             # schedule to mirror every {mirror_s} seconds

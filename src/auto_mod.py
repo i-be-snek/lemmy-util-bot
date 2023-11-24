@@ -76,11 +76,8 @@ class AutoMod:
         logging.info(f"Found {len(output)} threads to add auto mod comment to.")
         return output
 
-    def comment_on_new_threads(self, mod_message: str = None):
+    def comment_on_new_threads(self, mod_message: str = "Be nice!"):
         new_threads: dict = self._find_new_threads()
-        if mod_message is None:
-            mod_message = open("src/mod_comment_new_threads.md", "r").read()
-
         num = 0
         for thread in new_threads:
             if not thread.deleted and not thread.removed:
