@@ -53,12 +53,14 @@ def mirror(
             return
 
         thread_sample = random.sample(threads, mirror_threads_limit)
-        logging.info(f"Capping the number of threads to mirror at {mirror_threads_limit}")
+        logging.info(
+            f"Capping the number of threads to mirror at {mirror_threads_limit}"
+        )
 
         mirror_threads_to_lemmy(
             lemmy, thread_sample, config.LEMMY_COMMUNITY, database, mirror_delay
         )
-    
+
     logging.info(f"Posted {mirror_threads_limit} threads in total")
 
     # if this is the first mirror job to run
@@ -86,7 +88,7 @@ if __name__ == "__main__":
 
     # schedule tasks
     if Task.mod_comment_on_new_threads in config.TASKS:
-        interval = 60*3
+        interval = 60 * 3
         schedule.every(interval).seconds.do(
             automod_comment_on_new_threads, config=config, lemmy=lemmy
         )
