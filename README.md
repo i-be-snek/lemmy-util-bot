@@ -131,9 +131,9 @@ This is the step where you can configure your bot.
     > Please be civil!
     > Stick to the [rules](https://legal.lemmy.world/). For reports, contact the mods.
 
-> [!WARNING]  
-> Steps 4-9 are only needed the `mirror_threads` task. 
 
+    > [!WARNING]  
+    > Steps 4-8 are only needed the `mirror_threads` task. 
 
 4. **Fill the Reddit variables**  
 
