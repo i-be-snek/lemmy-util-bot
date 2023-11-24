@@ -1,17 +1,18 @@
-from dotenv import dotenv_values
-from tinydb import TinyDB
-import schedule
+import logging
 import os
+import random
+
+import praw
+import pytz
+import schedule
+from dotenv import dotenv_values
+from pythorhead import Lemmy
+from tinydb import TinyDB
 
 from src.auth import lemmy_auth, reddit_oauth
-from src.helper import Config, DataBase, Task, ScheduleType
-from src.mirror import get_threads_from_reddit, mirror_threads_to_lemmy
 from src.auto_mod import AutoMod
-import praw
-import logging
-from pythorhead import Lemmy
-import random
-import pytz
+from src.helper import Config, DataBase, ScheduleType, Task
+from src.mirror import get_threads_from_reddit, mirror_threads_to_lemmy
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(message)s",
@@ -136,6 +137,9 @@ if __name__ == "__main__":
             logging.info(
                 f"TASK: Mirroring threads every every day at {time_utc} UTC with a delay of {mirror_delay_s} seconds between threads"
             )
+            logging.info(
+            f"Checking up to {filter_limit} threads at a time, posting {reddit_cap} at a time, at {time_utc} UTC.."
+        )
         elif schedule_type == ScheduleType.every_x_seconds:
             # schedule to mirror every {mirror_s} seconds
             mirror_s = config.MIRROR_THREADS_EVERY_SECOND
@@ -167,6 +171,10 @@ if __name__ == "__main__":
                 f"TASK: Mirroring threads every {mirror_s} seconds with a delay of {mirror_delay_s} seconds between threads"
             )
 
+            logging.info(
+            f"Checking up to {filter_limit} threads at a time, posting {reddit_cap} at a time, starting now..."
+        )
+
         # refresh the database file in filestack
         schedule.every(refresh_m).minutes.do(
             filestack.refresh_backup,
@@ -183,9 +191,7 @@ if __name__ == "__main__":
             handle=config.FILESTACK_HANDLE_BACKUP,
         )
 
-        logging.info(
-            f"Checking up to {filter_limit} threads at a time, posting {reddit_cap} at a time, starting now..."
-        )
+
         logging.info(
             f"Refreshing the database file every {refresh_m} minutes; creating a backup copy every {backup_h} hours"
         )
