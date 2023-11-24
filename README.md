@@ -10,7 +10,7 @@
 | ------------------------   | ---------------| ---------- |
 | `mod_comment_on_new_threads` | Add a [custom mod message](#configure-the-mod-message) to all new posts in a lemmy community | SUPPORTED :white_check_mark:
 | `mirror_threads`             | Mirror threads from one reddit sub to one lemmy instance       | SUPPORTED :white_check_mark:
-|   TBD                      |  Media Bias/Fact Check comment on new URL threads              | IN PROGRESS :hammer:
+|   TBD                      |  Media Bias/Fact Check (or some other "less biased" source) comment on new URL threads              | IN PROGRESS :hammer:
 |   TBD                      |  Send an auto-message to users reporting content | IN PROGRESS :hammer:
 
 This project is a hobby project and open to requests. 
@@ -25,14 +25,9 @@ This project is a hobby project and open to requests.
 2. [Docker](https://docs.docker.com/engine/install/), version >= 24.0
 3. Basic knowledge of python, docker, and git
 
-## Building your own instance of the bot
 
-You can deploy your own instance of the bot, either locally on your own computer, or by deploying it to a cloud service. One easy and check option is [Digital Ocean](https://docs.digitalocean.com/products/)
-
-Follow these steps to configure and run the bot:
-
-### (A) Initial setup and prequisites
-1. Clone this repo
+### Develop yourself
+1. Clone the repo:
 
     ```shell
     git clone https://github.com/i-be-snek/lemmy-util-bot.git
@@ -61,8 +56,13 @@ Follow these steps to configure and run the bot:
     # activate virtual env via poetry
     poetry shell
     ```
+## Building your own instance of the bot
 
-### (B) Configure the bot settings
+You can deploy your own instance of the bot, either locally on your own computer, or by deploying it to a cloud service. One easy option is [Digital Ocean](https://docs.digitalocean.com/products/)
+
+Follow these steps to configure and run the bot:
+
+### Configure the bot settings
 
 This is the step where you can configure your bot. 
 
@@ -82,6 +82,7 @@ This is the step where you can configure your bot.
     LEMMY_PASSWORD=
     LEMMY_INSTANCE=
     LEMMY_COMMUNITY=
+    LEMMY_MOD_MESSAGE_NEW_THREADS=
     ```
     
     For the `mirror_threads` task: 
@@ -111,7 +112,7 @@ This is the step where you can configure your bot.
 
 3. **Fill the Lemmy variables.** 
 
-    The first three are easy.
+    The first four are easy.
     At this point, it's recommended to create a new lemmy account that is clearly marked as a bot. `LEMMY_USERNAME` should not include `u/`. The URL to the lemmy instance `LEMMY_INSTANCE` should include `https://`. The `LEMMY_COMMUNITY` is the target community where the bot will be able to write threads. Do not include `c/` in the community name. Example:
     ```shell
     LEMMY_USERNAME="AweSomeUser65"
@@ -120,6 +121,15 @@ This is the step where you can configure your bot.
     LEMMY_COMMUNITY="world"
     ```
 
+    The `LEMMY_MOD_MESSAGE_NEW_THREADS` is a custom message to post on each new thread in your lemmy community. If it spans over several new lines, replace the new lines with `\n\n`. Use the same markdown rules of the lemmy instance you want to deploy the bot on and it should (hopefully) format it correctly. 
+
+    ```
+    LEMMY_MOD_MESSAGE_NEW_THREADS=Please be civil!\n\nStick to the [rules](https://legal.lemmy.world/). For reports, contact u/my_community_mod
+    ```
+
+    This would render the mod message as follows:
+    > Please be civil!
+    > Stick to the [rules](https://legal.lemmy.world/). For reports, contact the mods.
 
 > [!WARNING]  
 > Steps 4-9 are only needed the `mirror_threads` task. 
@@ -203,24 +213,14 @@ This is the step where you can configure your bot.
     REDDIT_THREADS_TO_IGNORE="mirrored,pinned,nsfw"
     ```
 
-8. Confirm that all vital environment variables are present in `.env` by running this pythohon test:
-
-    ```shell
-    poetry shell pytest -k test_check_prod_configs
-    ```
-
-    This test should show you which variables are missing, and will only pass if all needed env variables have been filled.
-
-    ```shell
-    # failed due to REDDIT_USER_AGENT being missing
-
-    ERROR    root:helper.py:55 Variable REDDIT_USER_AGENT is missing
-    ============================================================================================================================================================================================= short test summary info =============================================================================================================================================================================================
-    FAILED tests/test_helper.py::TestClassHelper::test_check_prod_configs - AssertionError: One or more variables are missing
+    I recommend these settings to avoid mod posts, pinned posts, and reddit gallery posts that don't render so nicely on the lemmy ui:
 
     ```
+    REDDIT_THREADS_TO_IGNORE="mirrored,pinned,nsfw,poll,locked,video,reddit_gallery"
+    ```
 
-9. You configure the scheduling times by adding these to the .env file (otherwise the script falls back to its defaults):
+
+8. You configure the scheduling times by adding these to the .env file (otherwise the script falls back to its defaults):
 
     ```shell
     # how long to wait in hours before making a backup of the filestack database, default = 36 (hours)
@@ -230,6 +230,15 @@ This is the step where you can configure your bot.
     # this should be done frequently default = 30 (minutes)
     REFRESH_FILESTACK_EVERY_MINUTE=30
 
+    # the number of new threads to mirror, from the list of threads available to mirror
+    # this is useful when complying with lemmy instance regulations that may only allow up to N threads mirrored per day/hour, etc. 
+    REDDIT_CAP_NUMBER_OF_MIRRORED_THREADS=10
+
+    ```
+    
+    #### Scheduling Option 1: If you want to mirror threads every X seconds, use these settings:
+
+    ```
     # schedule the mirror script to run every X seconds (to comply with the Lemmy instance rules or 
     # avoid reposting every second, for example), default = 60 (seconds)
     MIRROR_THREADS_EVERY_SECOND=60
@@ -240,16 +249,25 @@ This is the step where you can configure your bot.
     # the number of new threads to consider for mirroring, default = 30 threads
     REDDIT_FILTER_THREAD_LIMIT=30
 
-    # the number of new threads to mirror, from the list of threads available to mirror
-    # this is useful when complying with lemmy instance regulations that may only allow up to N threads mirrored per day/hour, etc. 
-    REDDIT_CAP_NUMBER_OF_MIRRORED_THREADS=10
     ```
+
+    #### Scheduling Option 2: If you want the bot to only post once a day, you can specify this in UCT time:
+
+    ```
+    MIRROR_EVERY_DAY_AT="12:30"
+    ```
+
 
 
 ### (C) Build the docker image
 
-Now that the .env file is ready, we can build and run the docker image.
+Now that the `.env`` file is ready, we can build and run the docker image.
 
+The variables filled in the `.env` file need to be available to the bot at runtime
+
+```
+set -a; source .env; set +a
+```
 
 ```shell
 # build the docker image and add a tag
@@ -260,15 +278,30 @@ Once built, the bot can start working locally.
 
 ```shell
 # run the docker image
-docker run lemmy-util-bot:latest
+docker run --env-file .env lemmy-util-bot:latest
 ```
 
 
-## More to tweak
+If some of your variables are missing for the tasks you selected, the script will list these in the log. Example:
 
-### Configure the mod message
+```shell
+Skipping virtualenv creation, as specified in config file.
+2023-11-24 17:14:05 ERROR    Main variable LEMMY_USERNAME is missing
+2023-11-24 17:14:05 ERROR    Main variable LEMMY_PASSWORD is missing
+2023-11-24 17:14:05 ERROR    Main variable LEMMY_INSTANCE is missing
+2023-11-24 17:14:05 ERROR    Main variable LEMMY_COMMUNITY is missing
+2023-11-24 17:14:05 ERROR    Main variable TASKS is missing
+2023-11-24 17:14:05 ERROR    Main variable LEMMY_MOD_MESSAGE_NEW_THREADS is missing
+Traceback (most recent call last):
+  File "//main.py", line 84, in <module>
+    config = Config(env_values)
+  File "<string>", line 8, in __init__
+  File "/src/helper.py", line 92, in __post_init__
+    for x in Util._get_clean_list(self.config["TASKS"])
+KeyError: 'TASKS'
+```
 
-For `mod_comment_on_new_threads`, create a markdown file in `src/` named `mod_comment_new_threads.md` to customize the bot's mod comment to new threads. Use the same markdown rules of the lemmy instance you want to deploy the bot on and it should (hopefully) format it correctly. 
+
 
 ## Deployimg the bot (to Digital Ocean)
 
