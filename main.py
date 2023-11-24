@@ -131,8 +131,10 @@ if __name__ == "__main__":
                 mirror_delay=mirror_delay_s,
                 cancel_after_first_run=False,
             )
+            logging.info(
+                f"TASK: Mirroring threads every every dat at {time_utc} UTC with a delay of {mirror_delay_s} seconds between threads"
+            )
         elif schedule_type == ScheduleType.every_x_seconds:
-
             # schedule to mirror every {mirror_s} seconds
             mirror_s = config.MIRROR_THREADS_EVERY_SECOND
             schedule.every(mirror_s).seconds.do(
@@ -159,6 +161,9 @@ if __name__ == "__main__":
                 mirror_delay=mirror_delay_s,
                 cancel_after_first_run=True,
             )
+            logging.info(
+                f"TASK: Mirroring threads every {mirror_s} seconds with a delay of {mirror_delay_s} seconds between threads"
+            )
 
         # refresh the database file in filestack
         schedule.every(refresh_m).minutes.do(
@@ -177,9 +182,7 @@ if __name__ == "__main__":
         )
 
         logging.info(
-            f"TASK: Mirroring threads every {mirror_s} seconds with a delay of {mirror_delay_s} seconds between threads")
-        
-        logging.info(f"Checking up to {filter_limit} threads at a time, posting {reddit_cap} at a time, starting now..."
+            f"Checking up to {filter_limit} threads at a time, posting {reddit_cap} at a time, starting now..."
         )
         logging.info(
             f"Refreshing the database file every {refresh_m} minutes; creating a backup copy every {backup_h} hours"
