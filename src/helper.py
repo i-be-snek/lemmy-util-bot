@@ -51,6 +51,7 @@ class Config:
         "LEMMY_INSTANCE",
         "LEMMY_COMMUNITY",
         "TASKS",
+        "LEMMY_MOD_MESSAGE_NEW_THREADS"
     )
 
     mirror_configs: tuple = (
@@ -65,6 +66,7 @@ class Config:
         "FILESTACK_APP_SECRET",
         "FILESTACK_HANDLE_REFRESH",
         "FILESTACK_HANDLE_BACKUP",
+        "FILESTACK_HANDLE_MOD_MESSAGE"
         "REDDIT_MIRROR_SCHEDULE_TYPE",
     )
 
@@ -106,6 +108,7 @@ class Config:
         self.LEMMY_PASSWORD: str = self.config["LEMMY_PASSWORD"]
         self.LEMMY_INSTANCE: str = self.config["LEMMY_INSTANCE"]
         self.LEMMY_COMMUNITY: str = self.config["LEMMY_COMMUNITY"]
+        self.LEMMY_MOD_MESSAGE_NEW_THREADS: str = self.config["LEMMY_MOD_MESSAGE_NEW_THREADS"]
 
         if Task.mirror_threads in self.TASKS:
             self.REDDIT_CLIENT_ID: str = self.config["REDDIT_CLIENT_ID"]
