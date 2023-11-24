@@ -13,7 +13,6 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-    - name: Create envfile from single secret
     - name: Build image
       run: docker build -t "${{ secrets.DO_image }}" .
     - name: Save Docker image
