@@ -31,7 +31,7 @@ full_config = OrderedDict(
         "REDDIT_THREADS_TO_IGNORE": "mirrored,pinned,nsfw",
         "TASKS": "mirror_threads, mod_comment_on_new_threads",
         "REDDIT_MIRROR_SCHEDULE_TYPE": "daily",
-        "LEMMY_MOD_MESSAGE_NEW_THREADS": "hello from the mod bot!"
+        "LEMMY_MOD_MESSAGE_NEW_THREADS": "hello from the mod bot!",
     }
 )
 thread = {

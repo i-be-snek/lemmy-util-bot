@@ -26,6 +26,7 @@ class TestClassHelper:
             RedditThread.nsfw,
         ]
 
+
 @pytest.mark.parametrize("test_filestack", [DataBase("tests/filestack_tests.txt")])
 class TestClassDataBase:
     def test__upload_backup_bad_apikey_app_key_fail(self, test_filestack):
