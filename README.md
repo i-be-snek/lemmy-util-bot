@@ -66,6 +66,10 @@ Follow these steps to configure and run the bot:
 
 This is the step where you can configure your bot. 
 
+> [!WARNING]  
+> Steps 4-8 are only needed the `mirror_threads` task. 
+
+
 1. Create a new text file named ".env" in the root directory of the repo
 
     ```shell
@@ -131,9 +135,6 @@ This is the step where you can configure your bot.
     > Please be civil!
     > Stick to the [rules](https://legal.lemmy.world/). For reports, contact the mods.
 
-
-    > [!WARNING]  
-    > Steps 4-8 are only needed the `mirror_threads` task. 
 
 4. **Fill the Reddit variables**  
 
@@ -263,7 +264,6 @@ This is the step where you can configure your bot.
 
 Now that the `.env`` file is ready, we can build and run the docker image.
 
-The variables filled in the `.env` file need to be available to the bot at runtime
 
 ```
 set -a; source .env; set +a
@@ -274,14 +274,14 @@ set -a; source .env; set +a
 docker build -t lemmy-util-bot:latest .
 ```
 
-Once built, the bot can start working locally.
+The variables filled in the `.env` file need to be available to the bot at runtime. This can be done with docker's `--env-file` option
 
 ```shell
 # run the docker image
 docker run --env-file .env lemmy-util-bot:latest
 ```
 
-
+Once built, the bot can start working locally.
 If some of your variables are missing for the tasks you selected, the script will list these in the log. Example:
 
 ```shell
@@ -300,7 +300,6 @@ Traceback (most recent call last):
     for x in Util._get_clean_list(self.config["TASKS"])
 KeyError: 'TASKS'
 ```
-
 
 
 ## Deployimg the bot (to Digital Ocean)
