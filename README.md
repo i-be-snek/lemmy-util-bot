@@ -15,11 +15,6 @@
 
 This project is a hobby project and open to requests. 
 
-| :zap:      Deployed on   |
-|-----------------------------------------|
-| [!exmuslim@lemmy.world](https://lemmy.world/c/exmuslim) | 
-| [!atheismindia@lemmy.world](https://lemmy.world/c/atheismindia) |
-
 ## Prerequisites
 1. [Poetry](https://python-poetry.org/docs/#installation), version 1.6, With Python >=3.9,<3.12
 2. [Docker](https://docs.docker.com/engine/install/), version >= 24.0
