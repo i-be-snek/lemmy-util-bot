@@ -3,7 +3,7 @@ FROM mwalbeck/python-poetry:1.6.1-3.9
 
 RUN mkdir src tests data
 
-COPY main.py paused.py poetry.lock pyproject.toml / 
+COPY main.py paused.py poetry.lock pyproject.toml /
 COPY tests/* tests
 COPY src/* src
 

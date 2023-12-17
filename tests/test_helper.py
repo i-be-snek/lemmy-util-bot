@@ -6,8 +6,14 @@ from filestack import Client, Filelink
 from filestack.exceptions import FilestackHTTPError
 from tinydb import TinyDB
 
-from src.helper import (Config, DataBase, FileDownloadError, FileUploadError,
-                        RedditThread, Util)
+from src.helper import (
+    Config,
+    DataBase,
+    FileDownloadError,
+    FileUploadError,
+    RedditThread,
+    Util,
+)
 from tests import items
 
 
@@ -33,26 +39,20 @@ class TestClassDataBase:
         c = Config(items.full_config)
 
         with pytest.raises(FilestackHTTPError):
-            test_filestack._upload_backup(
-                c.FILESTACK_APP_SECRET, c.FILESTACK_API_KEY, "test.json"
-            )
+            test_filestack._upload_backup(c.FILESTACK_APP_SECRET, c.FILESTACK_API_KEY, "test.json")
 
     def test__upload_backup_fail(self, test_filestack):
         c = Config(items.full_config)
         with mock.patch.object(Client, "upload", return_value=None):
             with pytest.raises(FileUploadError):
-                file = test_filestack._upload_backup(
-                    c.FILESTACK_APP_SECRET, c.FILESTACK_API_KEY, "test.json"
-                )
+                file = test_filestack._upload_backup(c.FILESTACK_APP_SECRET, c.FILESTACK_API_KEY, "test.json")
                 assert file
 
     def test_get_backup_bad_apikey_app_key_fail(self, test_filestack):
         c = Config(items.full_config)
 
         with pytest.raises(FilestackHTTPError):
-            test_filestack.get_backup(
-                c.FILESTACK_APP_SECRET, c.FILESTACK_API_KEY, c.FILESTACK_HANDLE_REFRESH
-            )
+            test_filestack.get_backup(c.FILESTACK_APP_SECRET, c.FILESTACK_API_KEY, c.FILESTACK_HANDLE_REFRESH)
 
     def test_get_backup_fail(self, test_filestack):
         c = Config(items.full_config)
@@ -69,9 +69,7 @@ class TestClassDataBase:
         c = Config(items.full_config)
 
         with pytest.raises(FilestackHTTPError):
-            test_filestack.refresh_backup(
-                c.FILESTACK_APP_SECRET, c.FILESTACK_API_KEY, c.FILESTACK_HANDLE_REFRESH
-            )
+            test_filestack.refresh_backup(c.FILESTACK_APP_SECRET, c.FILESTACK_API_KEY, c.FILESTACK_HANDLE_REFRESH)
 
     def test_refresh_backup_fail(self, test_filestack):
         c = Config(items.full_config)

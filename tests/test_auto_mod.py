@@ -15,15 +15,11 @@ class TestClassAutoMod:
 
         auto_mod = AutoMod(mock_lemmy, "world", "TestModBot")
 
-        assert auto_mod._find_new_threads() == [
-            LemmyThread(False, False, False, 3, False, False, False)
-        ]
+        assert auto_mod._find_new_threads() == [LemmyThread(False, False, False, 3, False, False, False)]
 
     def test__comment_as_mod(self):
         mock_lemmy = mock.MagicMock()
-        mock_lemmy.comment.create.return_value = {
-            "comment_view": {"comment": {"id": 1}}
-        }
+        mock_lemmy.comment.create.return_value = {"comment_view": {"comment": {"id": 1}}}
         mock_lemmy.comment.distinguish.return_value = True
         auto_mod = AutoMod(mock_lemmy, "world", "TestModBot")
         assert auto_mod._comment_as_mod(content="Test Content", post_id=123) == 1

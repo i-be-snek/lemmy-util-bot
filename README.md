@@ -13,7 +13,7 @@
 |   TBD                      |  Media Bias/Fact Check (or some other "less biased" source) comment on new URL threads              | IN PROGRESS :hammer:
 |   TBD                      |  Send an auto-message to users reporting content | IN PROGRESS :hammer:
 
-This project is a hobby project and open to requests. 
+This project is a hobby project and open to requests.
 
 ## Prerequisites
 1. [Poetry](https://python-poetry.org/docs/#installation), version 1.6, With Python >=3.9,<3.12
@@ -40,7 +40,7 @@ This project is a hobby project and open to requests.
     >> Docker version 24.0.6, build ed223bc
     ```
 
-    Note that the minor and patch versions may differ. 
+    Note that the minor and patch versions may differ.
 
 3. Install dependencies via Poetry and activate the virtual environment
 
@@ -59,10 +59,10 @@ Follow these steps to configure and run the bot:
 
 ### Configure the bot settings
 
-This is the step where you can configure your bot. 
+This is the step where you can configure your bot.
 
-> [!WARNING]  
-> Steps 4-8 are only needed the `mirror_threads` task. 
+> [!WARNING]
+> Steps 4-8 are only needed the `mirror_threads` task.
 
 
 1. Create a new text file named `.env` in the root directory of the repo
@@ -74,7 +74,7 @@ This is the step where you can configure your bot.
 2. Open the file in your favorite editor and paste the following inside:
 
 
-    For the `mod_comment_on_new_threads` task: 
+    For the `mod_comment_on_new_threads` task:
 
     ```shell
     LEMMY_USERNAME=
@@ -83,16 +83,16 @@ This is the step where you can configure your bot.
     LEMMY_COMMUNITY=
     LEMMY_MOD_MESSAGE_NEW_THREADS=
     ```
-    
-    For the `mirror_threads` task: 
+
+    For the `mirror_threads` task:
 
     ```shell
-    REDDIT_CLIENT_ID= 
-    REDDIT_CLIENT_SECRET= 
+    REDDIT_CLIENT_ID=
+    REDDIT_CLIENT_SECRET=
     REDDIT_PASSWORD=
-    REDDIT_USER_AGENT= 
-    REDDIT_USERNAME= 
-    REDDIT_SUBREDDIT= 
+    REDDIT_USER_AGENT=
+    REDDIT_USERNAME=
+    REDDIT_SUBREDDIT=
     FILESTACK_API_KEY=
     FILESTACK_APP_SECRET=
     FILESTACK_HANDLE_REFRESH=
@@ -100,16 +100,16 @@ This is the step where you can configure your bot.
     REDDIT_THREADS_TO_IGNORE=
     FILTER_BY=
     ```
-    
+
     Finally, paste the `TASKS` variable into the file with a list of the tasks you want the bot to perform.
     For example, to mirror threads and also post a mod comment on new threads, add the names of both tasks separated by a comma. The names of available tasks [can be found here](#supported-tasks)
 
     ```shell
     TASKS=mod_comment_on_new_threads, mirror_threads
     ```
-    
 
-3. **Fill the Lemmy variables.** 
+
+3. **Fill the Lemmy variables.**
 
     The first four are easy.
     At this point, it's recommended to create a new lemmy account that is clearly marked as a bot. `LEMMY_USERNAME` should not include `u/`. The URL to the lemmy instance `LEMMY_INSTANCE` should include `https://`. The `LEMMY_COMMUNITY` is the target community where the bot will be able to write threads. Do not include `c/` in the community name. Example:
@@ -120,7 +120,7 @@ This is the step where you can configure your bot.
     LEMMY_COMMUNITY=world
     ```
 
-    The `LEMMY_MOD_MESSAGE_NEW_THREADS` is a custom message to post on each new thread in your lemmy community. If it spans over several new lines, replace the new lines with `\n\n`. Use the same markdown rules of the lemmy instance you want to deploy the bot on and it should (hopefully) format it correctly. 
+    The `LEMMY_MOD_MESSAGE_NEW_THREADS` is a custom message to post on each new thread in your lemmy community. If it spans over several new lines, replace the new lines with `\n\n`. Use the same markdown rules of the lemmy instance you want to deploy the bot on and it should (hopefully) format it correctly.
 
     ```
     LEMMY_MOD_MESSAGE_NEW_THREADS=Please be civil!\n\nStick to the [rules](https://legal.lemmy.world/). For reports, contact u/my_community_mod
@@ -131,12 +131,12 @@ This is the step where you can configure your bot.
     > Stick to the [rules](https://legal.lemmy.world/). For reports, contact the mods.
 
 
-4. **Fill the Reddit variables**  
+4. **Fill the Reddit variables**
 
-    `REDDIT_USERNAME` and `REDDIT_PASSWORD` are self-explanatory (but do not add `u/` to the username). 
-    
+    `REDDIT_USERNAME` and `REDDIT_PASSWORD` are self-explanatory (but do not add `u/` to the username).
+
     To get the `REDDIT_CLIENT_ID` and `REDDIT_CLIENT_SECRET`, you need to visit [reddit.com/prefs/apps](https://www.reddit.com/prefs/apps/) amd create an app. You can leave `about url` empty, and type `http://localhost:8080` into the `redirect uri` field.
-    
+
     Once successful, you'll be able to see a serial alphanumerical under the name of your app, right underneath _"personal use script"_. This is your `REDDIT_CLIENT_ID`. If you click "edit", you should be able to see the secret; this is your `REDDIT_CLIENT_SECRET`. Do not include `r/` in the `REDDIT_SUBREDDIT`. Finally, `REDDIT_USER_AGENT` is a free-text string to identify who you are and what task you are doing. It's best to include your main reddit username in this string. Example:
 
     ![](media/reddit_client_id_and_secret.png)
@@ -155,7 +155,7 @@ This is the step where you can configure your bot.
     Click `COPY APIKEY` from the top right corner, this is the value for `FILESTACK_API_KEY`. To get `FILESTACK_APP_SECRET`, click on `SECURITY` > `Policy & Signature` on the left tab. Toggle on the `Use Security` option and click "show" to see your app secret.
 
     ![](media/filestack.png)
-    
+
     ```shell
     FILESTACK_API_KEY=A6i4yasdRR0mJadJp0o8jdWA
     FILESTACK_APP_SECRET=2XTBUKJHHRFUN6KC62UV5MPY5Y
@@ -168,7 +168,7 @@ This is the step where you can configure your bot.
     ```
 
     The script will ask you to provide the Filestack API key and App secret.
-    
+
     Once done, the output should be similar to this:
 
     ```shell
@@ -187,23 +187,23 @@ This is the step where you can configure your bot.
 
 7. Finally, choose which threads to ignore
 
-    | name     | Ignores    | 
+    | name     | Ignores    |
     | -------- | ---------- |
-    | mirrored | Ignores already mirrored threads added to the Filestack backup                 | 
-    | pinned   | Ignores pinned (or "stickied") threads                                         | 
-    | nsfw     | Ignores NSFW threads marked as "over_18" by Reddit                             | 
-    | poll     | Ignore poll threads                                                            | 
-    | locked   | Ignore threads locked by mods                                                  | 
-    | video    | Ignore threads with an uploaded video (not threads linking to a video)         | 
-    | url      | Ignore threads with URL links external to Reddit. *Does not ignore image links | 
-    | flair    | Ignore threads which has a flair                                               | 
-    | body     | Ignore threads with only a text (non-image, non-url, non-video) body                                                | 
-    | image     | Ignore threads with an image url                                              | 
-    | reddit_gallery | Ignore "reddit gallery" images. This is useful because Reddit galleries don't embed well as links on Lemmy instances and would link to reddit | 
+    | mirrored | Ignores already mirrored threads added to the Filestack backup                 |
+    | pinned   | Ignores pinned (or "stickied") threads                                         |
+    | nsfw     | Ignores NSFW threads marked as "over_18" by Reddit                             |
+    | poll     | Ignore poll threads                                                            |
+    | locked   | Ignore threads locked by mods                                                  |
+    | video    | Ignore threads with an uploaded video (not threads linking to a video)         |
+    | url      | Ignore threads with URL links external to Reddit. *Does not ignore image links |
+    | flair    | Ignore threads which has a flair                                               |
+    | body     | Ignore threads with only a text (non-image, non-url, non-video) body                                                |
+    | image     | Ignore threads with an image url                                              |
+    | reddit_gallery | Ignore "reddit gallery" images. This is useful because Reddit galleries don't embed well as links on Lemmy instances and would link to reddit |
 
-    
+
     For example, to ignore NSFW, pinned, and already-mirrored threads from Reddit, type the names separated by a comma
-    
+
     ```shell
     REDDIT_THREADS_TO_IGNORE=mirrored,pinned,nsfw
     ```
@@ -226,18 +226,18 @@ This is the step where you can configure your bot.
     REFRESH_FILESTACK_EVERY_MINUTE=30
 
     # the number of new threads to mirror, from the list of threads available to mirror
-    # this is useful when complying with lemmy instance regulations that may only allow up to N threads mirrored per day/hour, etc. 
+    # this is useful when complying with lemmy instance regulations that may only allow up to N threads mirrored per day/hour, etc.
     REDDIT_CAP_NUMBER_OF_MIRRORED_THREADS=10
 
     # the number of new threads to consider for mirroring, default = 30 threads
     REDDIT_FILTER_THREAD_LIMIT=30
 
     ```
-    
+
     #### Scheduling Option 1: If you want to mirror threads every X seconds, use these settings:
 
     ```shell
-    # schedule the mirror script to run every X seconds (to comply with the Lemmy instance rules or 
+    # schedule the mirror script to run every X seconds (to comply with the Lemmy instance rules or
     # avoid reposting every second, for example), default = 60 (seconds)
     MIRROR_THREADS_EVERY_SECOND=60
 
@@ -294,5 +294,3 @@ KeyError: 'TASKS'
 ## Deployimg the bot (to Digital Ocean)
 
 (more on that soon)
-
-

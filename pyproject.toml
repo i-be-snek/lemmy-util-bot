@@ -6,7 +6,7 @@ authors = ["i-be-snek <sjzahra@proton.me>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.12" 
+python = ">=3.9,<3.12"
 requests = "^2.31.0"
 praw = "^7.7.1"
 pythorhead = ">=0.15"
@@ -15,6 +15,7 @@ tinydb = "^4.8.0"
 schedule = "^1.2.1"
 filestack-python = "^3.5.0"
 pytz = "^2023.3.post1"
+pre-commit = "^3.6.0"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.25.2"

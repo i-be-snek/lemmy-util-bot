@@ -87,10 +87,7 @@ class Config:
                 logging.error(f"Main variable {c} is missing")
                 self.keys_missing = True
 
-        self.TASKS: list = [
-            Util._getattr_mod(Task, x)
-            for x in Util._get_clean_list(self.config["TASKS"])
-        ]
+        self.TASKS: list = [Util._getattr_mod(Task, x) for x in Util._get_clean_list(self.config["TASKS"])]
 
         assert self.TASKS != [""]
 
@@ -107,9 +104,7 @@ class Config:
         self.LEMMY_PASSWORD: str = self.config["LEMMY_PASSWORD"]
         self.LEMMY_INSTANCE: str = self.config["LEMMY_INSTANCE"]
         self.LEMMY_COMMUNITY: str = self.config["LEMMY_COMMUNITY"]
-        self.LEMMY_MOD_MESSAGE_NEW_THREADS: str = self.config[
-            "LEMMY_MOD_MESSAGE_NEW_THREADS"
-        ]
+        self.LEMMY_MOD_MESSAGE_NEW_THREADS: str = self.config["LEMMY_MOD_MESSAGE_NEW_THREADS"]
 
         if Task.mirror_threads in self.TASKS:
             self.REDDIT_CLIENT_ID: str = self.config["REDDIT_CLIENT_ID"]
@@ -128,23 +123,15 @@ class Config:
                 for x in Util._get_clean_list(self.config["REDDIT_THREADS_TO_IGNORE"])
             ]
             self.REDDIT_THREADS_TO_IGNORE = (
-                self.REDDIT_THREADS_TO_IGNORE
-                if self.REDDIT_THREADS_TO_IGNORE != [""]
-                else []
+                self.REDDIT_THREADS_TO_IGNORE if self.REDDIT_THREADS_TO_IGNORE != [""] else []
             )
-            self.BACKUP_FILESTACK_EVERY_HOUR: int = int(
-                self.config.get("BACKUP_FILESTACK_EVERY_HOUR", 36)
-            )
-            self.REFRESH_FILESTACK_EVERY_MINUTE: int = int(
-                self.config.get("REFRESH_FILESTACK_EVERY_MINUTE", 30)
-            )
+            self.BACKUP_FILESTACK_EVERY_HOUR: int = int(self.config.get("BACKUP_FILESTACK_EVERY_HOUR", 36))
+            self.REFRESH_FILESTACK_EVERY_MINUTE: int = int(self.config.get("REFRESH_FILESTACK_EVERY_MINUTE", 30))
 
             self.DELAY_BETWEEN_MIRRORED_THREADS_SECOND: int = int(
                 self.config.get("DELAY_BETWEEN_MIRRORED_THREADS_SECOND", 60)
             )
-            self.REDDIT_FILTER_THREAD_LIMIT: int = int(
-                self.config.get("REDDIT_FILTER_THREAD_LIMIT", 30)
-            )
+            self.REDDIT_FILTER_THREAD_LIMIT: int = int(self.config.get("REDDIT_FILTER_THREAD_LIMIT", 30))
             self.REDDIT_CAP_NUMBER_OF_MIRRORED_THREADS: int = int(
                 self.config.get("REDDIT_CAP_NUMBER_OF_MIRRORED_THREADS", 10)
             )
@@ -156,15 +143,11 @@ class Config:
             )
 
             if self.REDDIT_MIRROR_SCHEDULE_TYPE == ScheduleType.daily:
-                self.MIRROR_EVERY_DAY_AT: str = self.config.get(
-                    "MIRROR_EVERY_DAY_AT", "12:30"
-                )
+                self.MIRROR_EVERY_DAY_AT: str = self.config.get("MIRROR_EVERY_DAY_AT", "12:30")
                 self.MIRROR_THREADS_EVERY_SECOND = None
 
             elif self.REDDIT_MIRROR_SCHEDULE_TYPE == ScheduleType.every_x_seconds:
-                self.MIRROR_THREADS_EVERY_SECOND: int = int(
-                    self.config.get("MIRROR_THREADS_EVERY_SECOND", 60 * 5)
-                )
+                self.MIRROR_THREADS_EVERY_SECOND: int = int(self.config.get("MIRROR_THREADS_EVERY_SECOND", 60 * 5))
                 self.MIRROR_EVERY_DAY_AT = None
 
 
@@ -190,15 +173,9 @@ class DataBase:
 
     @staticmethod
     def refresh_policy():
-        return {
-            "expiry": int(
-                (datetime.datetime.now() + datetime.timedelta(minutes=15)).timestamp()
-            )
-        }
+        return {"expiry": int((datetime.datetime.now() + datetime.timedelta(minutes=15)).timestamp())}
 
-    def _upload_backup(
-        self, app_secret: str, apikey: str, filename: str, db_path: str = None
-    ):
+    def _upload_backup(self, app_secret: str, apikey: str, filename: str, db_path: str = None):
         if db_path is None:
             db_path = self.db_path
 
@@ -211,9 +188,7 @@ class DataBase:
         )
 
         if not (file is None):
-            logging.info(
-                f"Uploading file {filename} to {file.url} with handle {file.handle}."
-            )
+            logging.info(f"Uploading file {filename} to {file.url} with handle {file.handle}.")
             return file
         else:
             raise FileUploadError("Upload to filestack failed.")
@@ -224,9 +199,7 @@ class DataBase:
         filelink = Filelink(handle=handle, security=security)
         d = filelink.download(self.db_path)
         if not (d is None):
-            logging.info(
-                f"Downloading backup file from {filelink.url} to {self.db_path}"
-            )
+            logging.info(f"Downloading backup file from {filelink.url} to {self.db_path}")
         else:
             raise FileDownloadError("Pulling backup from filestack failed")
 
@@ -236,13 +209,9 @@ class DataBase:
         filelink = Filelink(handle=handle, security=security)
         o = filelink.overwrite(filepath=self.db_path, security=security)
         if not (o is None):
-            logging.info(
-                f"Storing {filelink.metadata()['filename']} backup at {filelink.url}"
-            )
+            logging.info(f"Storing {filelink.metadata()['filename']} backup at {filelink.url}")
         else:
-            raise FileUploadError(
-                "Overwriting the database file from filestack failed."
-            )
+            raise FileUploadError("Overwriting the database file from filestack failed.")
 
 
 @dataclass
@@ -280,9 +249,7 @@ class Util:
             DB.insert(thread)
             logging.info(f"Inserted {thread['reddit_id']} into TinyDB")
         except Exception as e:
-            logging.error(
-                f"Could not insert {thread['reddit_id']} into TinyDB. Exception: {e}"
-            )
+            logging.error(f"Could not insert {thread['reddit_id']} into TinyDB. Exception: {e}")
 
     @staticmethod
     def _get_clean_list(text: str, sep: str = ",") -> list:
