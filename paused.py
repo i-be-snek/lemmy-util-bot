@@ -1,5 +1,5 @@
-import time
 import logging
+import time
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)-8s %(message)s",

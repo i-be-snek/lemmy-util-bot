@@ -34,18 +34,14 @@ class AutoMod:
         content: str,
     ) -> int:
         try:
-            comment = self.auto_mod.comment.create(
-                post_id=post_id, content=content, language_id=LanguageType.EN
-            )
+            comment = self.auto_mod.comment.create(post_id=post_id, content=content, language_id=LanguageType.EN)
         except Exception as e:
             logging.error(f"Could not comment! {e}")
 
         comment_id = comment["comment_view"]["comment"]["id"]
 
         try:
-            distinguish = self.auto_mod.comment.distinguish(
-                comment_id=comment_id, distinguished=True
-            )
+            distinguish = self.auto_mod.comment.distinguish(comment_id=comment_id, distinguished=True)
 
         except Exception as e:
             logging.error(f"Could not distinguish comment {comment_id} as a Mod! {e}")
@@ -53,9 +49,7 @@ class AutoMod:
         return comment_id
 
     def _find_new_threads(self) -> List[LemmyThread]:
-        new_threads = self.auto_mod.post.list(
-            community_id=self.community_id, sort=SortType.New, limit=20
-        )
+        new_threads = self.auto_mod.post.list(community_id=self.community_id, sort=SortType.New, limit=20)
 
         output = []
 
@@ -84,9 +78,7 @@ class AutoMod:
                 # add mod comment
                 num += 1
                 logging.info(f"Commenting on thread with ID: {thread.post_id}")
-                comment = self._comment_as_mod(
-                    post_id=thread.post_id, content=mod_message
-                )
+                comment = self._comment_as_mod(post_id=thread.post_id, content=mod_message)
                 # save thread
                 self.auto_mod.post.save(post_id=thread.post_id, saved=True)
 

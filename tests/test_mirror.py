@@ -28,9 +28,7 @@ class TestClassMirror:
         mock_listing.permalink = "comments/tg_2ggk3"
         mock_listing.link_flair_text = None
 
-        threads_to_mirror = _extract_threads_to_mirror(
-            [mock_listing], test_db, [RedditThread.poll]
-        )
+        threads_to_mirror = _extract_threads_to_mirror([mock_listing], test_db, [RedditThread.poll])
         assert len(threads_to_mirror) == 0
 
     def test__extract_threads_to_mirror_ignore_poll_two_valid_threads(self):
@@ -48,9 +46,7 @@ class TestClassMirror:
         mock_listing.permalink = "comments/tg_2ggk3"
         mock_listing.link_flair_text = None
 
-        threads_to_mirror = _extract_threads_to_mirror(
-            [mock_listing, mock_listing], test_db, [RedditThread.poll]
-        )
+        threads_to_mirror = _extract_threads_to_mirror([mock_listing, mock_listing], test_db, [RedditThread.poll])
         assert len(threads_to_mirror) == 2
 
     def test_mirror_threads_to_lemmy_no_threads(self):

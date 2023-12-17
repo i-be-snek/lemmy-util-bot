@@ -56,9 +56,7 @@ def _extract_threads_to_mirror(
         # if the reddit_id is in the url, it's the url to the reddit post
         # otherwise, it's the url to external content embedded into the thread
         # the same goes for reddit gallery links
-        url: Union[str, None] = (
-            None if reddit_id.split("_", 1)[1] in url_attr else url_attr
-        )
+        url: Union[str, None] = None if reddit_id.split("_", 1)[1] in url_attr else url_attr
 
         # add the missing reddit domain if missing in url from api
         if url is not None:
@@ -67,18 +65,12 @@ def _extract_threads_to_mirror(
 
         # check if url is a reddit gallery
         if url:
-            reddit_gallery: bool = (
-                True if re.match("^(https://v.redd.it/)\w+$", url) else False
-            )
+            reddit_gallery: bool = True if re.match("^(https://v.redd.it/)\w+$", url) else False
         else:
             reddit_gallery: bool = False
 
         # check if the url is an image
-        image = (
-            Util._check_if_image(url)
-            if (url is not None and reddit_gallery is False)
-            else None
-        )
+        image = Util._check_if_image(url) if (url is not None and reddit_gallery is False) else None
 
         # if it is, set the url to None
         url = None if (image is not None and reddit_gallery is not False) else url
@@ -89,11 +81,7 @@ def _extract_threads_to_mirror(
         permalink: str = f"{reddit_domain}{Util._getattr_mod(i, 'permalink')}"
         flair: Union[str, None] = Util._getattr_mod(i, "link_flair_text")
         flair = flair.strip() if flair else None
-        only_has_body = (
-            True
-            if (body is not None and not url and not image and not is_video)
-            else False
-        )
+        only_has_body = True if (body is not None and not url and not image and not is_video) else False
 
         ignore_map = {
             RedditThread.mirrored: is_mirrored,
@@ -111,9 +99,7 @@ def _extract_threads_to_mirror(
 
         for t in ignore_thread_types:
             if ignore_map[t]:
-                logging.info(
-                    f"Ignoring submission {i.name} with title {i.title}; {t.value} = {ignore_map[t]}"
-                )
+                logging.info(f"Ignoring submission {i.name} with title {i.title}; {t.value} = {ignore_map[t]}")
                 ignoring_post = True
 
         if not ignoring_post:
@@ -159,9 +145,7 @@ def get_threads_from_reddit(
     filter: str = "new",
 ) -> List[Submission]:
     if limit > 100:
-        logging.info(
-            f"Max limit of submissions to return is 100. The limit arg ({limit}) has now been set to 100."
-        )
+        logging.info(f"Max limit of submissions to return is 100. The limit arg ({limit}) has now been set to 100.")
         limit = 100
 
     available_filters = ("new", "hot", "rising")
@@ -186,9 +170,7 @@ def get_threads_from_reddit(
         listing = subreddit.rising(limit=limit)
         logging.info(f"Grabbed a list of {filter} threads from Reddit")
 
-    threads_to_mirror = _extract_threads_to_mirror(
-        listing=listing, DB=DB, ignore_thread_types=ignore_thread_types
-    )
+    threads_to_mirror = _extract_threads_to_mirror(listing=listing, DB=DB, ignore_thread_types=ignore_thread_types)
     logging.info(f"Found {len(threads_to_mirror)} potential threads to mirror")
 
     return threads_to_mirror
@@ -209,21 +191,15 @@ def mirror_threads_to_lemmy(
         sleep(delay)
         if not Util._check_thread_in_db(thread["reddit_id"], DB):
             # generate a bot disclaimer
-            bot_body = f"(This post was mirrored by a bot. [The original post can be found here]({thread['permalink']}))"
+            bot_body = (
+                f"(This post was mirrored by a bot. [The original post can be found here]({thread['permalink']}))"
+            )
 
             # add the bot disclaimer to the post and link to the original content
-            post_body = (
-                thread["body"] + "\n\n" + bot_body
-                if isinstance(thread["body"], str)
-                else bot_body
-            )
+            post_body = thread["body"] + "\n\n" + bot_body if isinstance(thread["body"], str) else bot_body
 
             # add flair if it exists
-            thread_title = (
-                f"{thread['flair']} | {thread['title']}"
-                if thread["flair"]
-                else thread["title"]
-            )
+            thread_title = f"{thread['flair']} | {thread['title']}" if thread["flair"] else thread["title"]
 
             # add a url or image url if they exist
             thread_url = thread["url"]
@@ -243,15 +219,11 @@ def mirror_threads_to_lemmy(
                 )
                 posted = True
             except Exception as e:
-                logging.error(
-                    f"Lemmy cound not create a post for thread {thread['reddit_id']}. Exception {e}."
-                )
+                logging.error(f"Lemmy cound not create a post for thread {thread['reddit_id']}. Exception {e}.")
 
             if posted:
                 num_mirrored_posts += 1
                 Util._insert_thread_into_db(thread, DB)
-                logging.info(
-                    f"Posted thread with reddit_id {thread['reddit_id']} in {community}"
-                )
+                logging.info(f"Posted thread with reddit_id {thread['reddit_id']} in {community}")
 
     return num_mirrored_posts

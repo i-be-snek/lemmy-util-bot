@@ -1,15 +1,12 @@
 import logging
 import os
 import random
+import threading
 
 import praw
-import pytz
 import schedule
-from dotenv import dotenv_values
 from pythorhead import Lemmy
 from tinydb import TinyDB
-
-import threading
 
 from src.auth import lemmy_auth, reddit_oauth
 from src.auto_mod import AutoMod
@@ -58,13 +55,9 @@ def mirror(
             return
 
         thread_sample = random.sample(threads, mirror_threads_limit)
-        logging.info(
-            f"Capping the number of threads to mirror at {mirror_threads_limit}"
-        )
+        logging.info(f"Capping the number of threads to mirror at {mirror_threads_limit}")
 
-        mirror_threads_to_lemmy(
-            lemmy, thread_sample, config.LEMMY_COMMUNITY, database, mirror_delay
-        )
+        mirror_threads_to_lemmy(lemmy, thread_sample, config.LEMMY_COMMUNITY, database, mirror_delay)
 
     logging.info(f"Posted {mirror_threads_limit} threads in total")
 
@@ -82,12 +75,15 @@ def automod_comment_on_new_threads(config: dict, lemmy: Lemmy):
     auto_mod = AutoMod(lemmy, config.LEMMY_COMMUNITY, config.LEMMY_USERNAME)
     auto_mod.comment_on_new_threads(mod_message=config.LEMMY_MOD_MESSAGE_NEW_THREADS)
 
+
 def raiseError(e):
     raise e
+
 
 def run_threaded(thread_func, kwargs):
     job_thread = threading.Thread(target=thread_func, kwargs=kwargs)
     job_thread.start()
+
 
 if __name__ == "__main__":
     # get config
@@ -105,9 +101,9 @@ if __name__ == "__main__":
             run_threaded,
             thread_func=automod_comment_on_new_threads,
             kwargs={
-            "config": config,
-            "lemmy": lemmy,
-            }
+                "config": config,
+                "lemmy": lemmy,
+            },
         )
         logging.info(f"TASK: Checking for new posts every {interval} seconds")
 
@@ -144,14 +140,14 @@ if __name__ == "__main__":
                 run_threaded,
                 thread_func=mirror,
                 kwargs={
-                "reddit": reddit,
-                "database": database,
-                "mirror_threads_limit": reddit_cap,
-                "filter": config.FILTER_BY,
-                "reddit_filter_limit": filter_limit,
-                "mirror_delay": mirror_delay_s,
-                "cancel_after_first_run": False,
-                }
+                    "reddit": reddit,
+                    "database": database,
+                    "mirror_threads_limit": reddit_cap,
+                    "filter": config.FILTER_BY,
+                    "reddit_filter_limit": filter_limit,
+                    "mirror_delay": mirror_delay_s,
+                    "cancel_after_first_run": False,
+                },
             )
             logging.info(
                 f"TASK: Mirroring threads every every day at {time_utc} UTC with a delay of {mirror_delay_s} seconds between threads"
@@ -166,15 +162,14 @@ if __name__ == "__main__":
                 run_threaded,
                 thread_func=mirror,
                 kwargs={
-                "reddit": reddit,
-                "database": database,
-                "mirror_threads_limit": reddit_cap,
-                "filter": config.FILTER_BY,
-                "reddit_filter_limit": filter_limit,
-                "mirror_delay": mirror_delay_s,
-                "cancel_after_first_run": False,
-                }
-
+                    "reddit": reddit,
+                    "database": database,
+                    "mirror_threads_limit": reddit_cap,
+                    "filter": config.FILTER_BY,
+                    "reddit_filter_limit": filter_limit,
+                    "mirror_delay": mirror_delay_s,
+                    "cancel_after_first_run": False,
+                },
             )
 
             # the scheduler will run the first job after {mirror_delay_s} seconds
