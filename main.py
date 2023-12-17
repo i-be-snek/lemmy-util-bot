@@ -67,7 +67,7 @@ def mirror(
 
 
 def show_job_thread():
-    print("Task is running on thread %s" % threading.current_thread())
+    logging.info("Task is running on thread %s" % threading.current_thread())
 
 
 def automod_comment_on_new_threads(config: dict, lemmy: Lemmy):
