@@ -9,6 +9,8 @@ from dotenv import dotenv_values
 from pythorhead import Lemmy
 from tinydb import TinyDB
 
+import threading
+
 from src.auth import lemmy_auth, reddit_oauth
 from src.auto_mod import AutoMod
 from src.helper import Config, DataBase, ScheduleType, Task
@@ -35,6 +37,8 @@ def mirror(
     mirror_delay: int = 25,
     cancel_after_first_run: bool = False,
 ) -> None:
+    show_job_thread()
+
     if not reddit:
         return
 
@@ -69,14 +73,21 @@ def mirror(
         return schedule.CancelJob
 
 
+def show_job_thread():
+    print("Task is running on thread %s" % threading.current_thread())
+
+
 def automod_comment_on_new_threads(config: dict, lemmy: Lemmy):
+    show_job_thread()
     auto_mod = AutoMod(lemmy, config.LEMMY_COMMUNITY, config.LEMMY_USERNAME)
     auto_mod.comment_on_new_threads(mod_message=config.LEMMY_MOD_MESSAGE_NEW_THREADS)
-
 
 def raiseError(e):
     raise e
 
+def run_threaded(thread_func, kwargs):
+    job_thread = threading.Thread(target=thread_func, kwargs=kwargs)
+    job_thread.start()
 
 if __name__ == "__main__":
     # get config
@@ -91,7 +102,12 @@ if __name__ == "__main__":
     if Task.mod_comment_on_new_threads in config.TASKS:
         interval = 60 * 3
         schedule.every(interval).seconds.do(
-            automod_comment_on_new_threads, config=config, lemmy=lemmy
+            run_threaded,
+            thread_func=automod_comment_on_new_threads,
+            kwargs={
+            "config": config,
+            "lemmy": lemmy,
+            }
         )
         logging.info(f"TASK: Checking for new posts every {interval} seconds")
 
@@ -125,36 +141,43 @@ if __name__ == "__main__":
             time_utc = config.MIRROR_EVERY_DAY_AT
             # schedule to mirror every day at {time_utc}
             schedule.every().day.at(time_utc, "UTC").do(
-                mirror,
-                reddit=reddit,
-                database=database,
-                mirror_threads_limit=reddit_cap,
-                filter=config.FILTER_BY,
-                reddit_filter_limit=filter_limit,
-                mirror_delay=mirror_delay_s,
-                cancel_after_first_run=False,
+                run_threaded,
+                thread_func=mirror,
+                kwargs={
+                "reddit": reddit,
+                "database": database,
+                "mirror_threads_limit": reddit_cap,
+                "filter": config.FILTER_BY,
+                "reddit_filter_limit": filter_limit,
+                "mirror_delay": mirror_delay_s,
+                "cancel_after_first_run": False,
+                }
             )
             logging.info(
                 f"TASK: Mirroring threads every every day at {time_utc} UTC with a delay of {mirror_delay_s} seconds between threads"
             )
             logging.info(
-            f"Checking up to {filter_limit} threads at a time, posting {reddit_cap} at a time, at {time_utc} UTC.."
-        )
+                f"Checking up to {filter_limit} threads at a time, posting {reddit_cap} at a time, at {time_utc} UTC.."
+            )
         elif schedule_type == ScheduleType.every_x_seconds:
             # schedule to mirror every {mirror_s} seconds
             mirror_s = config.MIRROR_THREADS_EVERY_SECOND
             schedule.every(mirror_s).seconds.do(
-                mirror,
-                reddit=reddit,
-                database=database,
-                mirror_threads_limit=reddit_cap,
-                filter=config.FILTER_BY,
-                reddit_filter_limit=filter_limit,
-                mirror_delay=mirror_delay_s,
-                cancel_after_first_run=False,
+                run_threaded,
+                thread_func=mirror,
+                kwargs={
+                "reddit": reddit,
+                "database": database,
+                "mirror_threads_limit": reddit_cap,
+                "filter": config.FILTER_BY,
+                "reddit_filter_limit": filter_limit,
+                "mirror_delay": mirror_delay_s,
+                "cancel_after_first_run": False,
+                }
+
             )
 
-            # the scheduler will run the first job after {mirror_s} seconds
+            # the scheduler will run the first job after {mirror_delay_s} seconds
             # but for the bot to activate immediately, we can run the function
             # first as a separate job and cancel it after the first run
             schedule.every().seconds.do(
@@ -172,8 +195,8 @@ if __name__ == "__main__":
             )
 
             logging.info(
-            f"Checking up to {filter_limit} threads at a time, posting {reddit_cap} at a time, starting now..."
-        )
+                f"Checking up to {filter_limit} threads at a time, posting {reddit_cap} at a time, starting now..."
+            )
 
         # refresh the database file in filestack
         schedule.every(refresh_m).minutes.do(
@@ -190,7 +213,6 @@ if __name__ == "__main__":
             apikey=config.FILESTACK_API_KEY,
             handle=config.FILESTACK_HANDLE_BACKUP,
         )
-
 
         logging.info(
             f"Refreshing the database file every {refresh_m} minutes; creating a backup copy every {backup_h} hours"
