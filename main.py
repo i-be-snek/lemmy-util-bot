@@ -74,8 +74,8 @@ def raiseError(e):
     raise e
 
 
-def run_threaded(thread_func: callable, name: str, kwargs: dict):
-    job_thread = threading.Thread(target=thread_func, daemon=True, name=name, kwargs=kwargs)
+def run_threaded(thread_func: callable, name: str, op_kwargs: dict = {}):
+    job_thread = threading.Thread(target=thread_func, daemon=True, name=name, kwargs=op_kwargs)
     job_thread.start()
 
 
@@ -95,12 +95,13 @@ if __name__ == "__main__":
             run_threaded,
             name="comment_on_new_threads",
             thread_func=automod_comment_on_new_threads,
-            kwargs={
+            op_kwargs={
                 "config": config,
                 "lemmy": lemmy,
             },
         )
         logging.info(f"TASK: Checking for new posts every {interval} seconds")
+        sleep(3)
 
     if Task.mirror_threads in config.TASKS:
         backup_h = config.BACKUP_FILESTACK_EVERY_HOUR
@@ -135,7 +136,7 @@ if __name__ == "__main__":
                 run_threaded,
                 thread_func=mirror,
                 name="mirror_daily",
-                kwargs={
+                op_kwargs={
                     "reddit": reddit,
                     "database": database,
                     "mirror_threads_limit": reddit_cap,
@@ -159,7 +160,7 @@ if __name__ == "__main__":
                 run_threaded,
                 thread_func=mirror,
                 name="mirror_every_x_seconds",
-                kwargs={
+                op_kwargs={
                     "reddit": reddit,
                     "database": database,
                     "mirror_threads_limit": reddit_cap,
@@ -219,11 +220,9 @@ if __name__ == "__main__":
         with database:
             while True:
                 schedule.run_pending()
-                sleep(2)
 
     else:
         # otherwise, run without database
         logging.info(f"Scheduler started")
         while True:
             schedule.run_pending()
-            sleep(2)
