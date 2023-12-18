@@ -2,6 +2,7 @@ import logging
 import os
 import random
 import threading
+from time import sleep
 
 import praw
 import schedule
@@ -33,10 +34,11 @@ def mirror(
     reddit_filter_limit: int = 10,
     mirror_delay: int = 25,
     cancel_after_first_run: bool = False,
+    lemmy: Lemmy = None,
 ) -> None:
-    show_job_thread()
+    logging.info("Task is running on thread %s" % threading.current_thread())
 
-    if not reddit:
+    if not reddit or not lemmy:
         return
 
     threads = get_threads_from_reddit(
@@ -49,11 +51,6 @@ def mirror(
     )
 
     if threads:
-        lemmy = lemmy_auth(config)
-
-        if not lemmy:
-            return
-
         thread_sample = random.sample(threads, mirror_threads_limit)
         logging.info(f"Capping the number of threads to mirror at {mirror_threads_limit}")
 
@@ -66,12 +63,9 @@ def mirror(
         return schedule.CancelJob
 
 
-def show_job_thread():
+def automod_comment_on_new_threads(config: dict, lemmy: Lemmy):
     logging.info("Task is running on thread %s" % threading.current_thread())
 
-
-def automod_comment_on_new_threads(config: dict, lemmy: Lemmy):
-    show_job_thread()
     auto_mod = AutoMod(lemmy, config.LEMMY_COMMUNITY, config.LEMMY_USERNAME)
     auto_mod.comment_on_new_threads(mod_message=config.LEMMY_MOD_MESSAGE_NEW_THREADS)
 
@@ -80,8 +74,8 @@ def raiseError(e):
     raise e
 
 
-def run_threaded(thread_func, kwargs):
-    job_thread = threading.Thread(target=thread_func, kwargs=kwargs)
+def run_threaded(thread_func: callable, name: str, op_kwargs: dict = {}):
+    job_thread = threading.Thread(target=thread_func, daemon=True, name=name, kwargs=op_kwargs)
     job_thread.start()
 
 
@@ -99,13 +93,15 @@ if __name__ == "__main__":
         interval = 60 * 3
         schedule.every(interval).seconds.do(
             run_threaded,
+            name="comment_on_new_threads",
             thread_func=automod_comment_on_new_threads,
-            kwargs={
+            op_kwargs={
                 "config": config,
                 "lemmy": lemmy,
             },
         )
         logging.info(f"TASK: Checking for new posts every {interval} seconds")
+        sleep(3)
 
     if Task.mirror_threads in config.TASKS:
         backup_h = config.BACKUP_FILESTACK_EVERY_HOUR
@@ -139,7 +135,8 @@ if __name__ == "__main__":
             schedule.every().day.at(time_utc, "UTC").do(
                 run_threaded,
                 thread_func=mirror,
-                kwargs={
+                name="mirror_daily",
+                op_kwargs={
                     "reddit": reddit,
                     "database": database,
                     "mirror_threads_limit": reddit_cap,
@@ -147,6 +144,7 @@ if __name__ == "__main__":
                     "reddit_filter_limit": filter_limit,
                     "mirror_delay": mirror_delay_s,
                     "cancel_after_first_run": False,
+                    "lemmy": lemmy,
                 },
             )
             logging.info(
@@ -161,7 +159,8 @@ if __name__ == "__main__":
             schedule.every(mirror_s).seconds.do(
                 run_threaded,
                 thread_func=mirror,
-                kwargs={
+                name="mirror_every_x_seconds",
+                op_kwargs={
                     "reddit": reddit,
                     "database": database,
                     "mirror_threads_limit": reddit_cap,
@@ -169,6 +168,7 @@ if __name__ == "__main__":
                     "reddit_filter_limit": filter_limit,
                     "mirror_delay": mirror_delay_s,
                     "cancel_after_first_run": False,
+                    "lemmy": lemmy,
                 },
             )
 
@@ -184,6 +184,7 @@ if __name__ == "__main__":
                 reddit_filter_limit=filter_limit,
                 mirror_delay=mirror_delay_s,
                 cancel_after_first_run=True,
+                lemmy=lemmy,
             )
             logging.info(
                 f"TASK: Mirroring threads every {mirror_s} seconds with a delay of {mirror_delay_s} seconds between threads"
