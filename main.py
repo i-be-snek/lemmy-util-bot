@@ -38,7 +38,7 @@ def mirror(
 
     logging.info("Task is running on thread %s" % threading.current_thread())
 
-    if not reddit or if not lemmy:
+    if not reddit or not lemmy:
         return
     
     threads = get_threads_from_reddit(
