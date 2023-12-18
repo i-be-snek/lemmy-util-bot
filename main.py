@@ -38,9 +38,9 @@ def mirror(
 
     logging.info("Task is running on thread %s" % threading.current_thread())
 
-    if not reddit:
+    if not reddit or if not lemmy:
         return
-
+    
     threads = get_threads_from_reddit(
         reddit,
         config.REDDIT_SUBREDDIT,
@@ -50,12 +50,7 @@ def mirror(
         filter=filter,
     )
 
-    if threads and not lemmy:
-        lemmy = lemmy_auth(config)
-
-        if not lemmy:
-            return
-
+    if threads:
         thread_sample = random.sample(threads, mirror_threads_limit)
         logging.info(f"Capping the number of threads to mirror at {mirror_threads_limit}")
 
@@ -224,11 +219,11 @@ if __name__ == "__main__":
         with database:
             while True:
                 schedule.run_pending()
-                sleep(5)
+                sleep(2)
 
     else:
         # otherwise, run without database
         logging.info(f"Scheduler started")
         while True:
             schedule.run_pending()
-            sleep(5)
+            sleep(2)
