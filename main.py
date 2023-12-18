@@ -2,7 +2,7 @@ import logging
 import os
 import random
 import threading
-
+from time import sleep 
 import praw
 import schedule
 from pythorhead import Lemmy
@@ -33,8 +33,10 @@ def mirror(
     reddit_filter_limit: int = 10,
     mirror_delay: int = 25,
     cancel_after_first_run: bool = False,
+    lemmy: Lemmy = None,
 ) -> None:
-    show_job_thread()
+
+    logging.info("Task is running on thread %s" % threading.current_thread())
 
     if not reddit:
         return
@@ -48,7 +50,7 @@ def mirror(
         filter=filter,
     )
 
-    if threads:
+    if threads and not lemmy:
         lemmy = lemmy_auth(config)
 
         if not lemmy:
@@ -66,12 +68,9 @@ def mirror(
         return schedule.CancelJob
 
 
-def show_job_thread():
+def automod_comment_on_new_threads(config: dict, lemmy: Lemmy):
     logging.info("Task is running on thread %s" % threading.current_thread())
 
-
-def automod_comment_on_new_threads(config: dict, lemmy: Lemmy):
-    show_job_thread()
     auto_mod = AutoMod(lemmy, config.LEMMY_COMMUNITY, config.LEMMY_USERNAME)
     auto_mod.comment_on_new_threads(mod_message=config.LEMMY_MOD_MESSAGE_NEW_THREADS)
 
@@ -80,8 +79,8 @@ def raiseError(e):
     raise e
 
 
-def run_threaded(thread_func, kwargs):
-    job_thread = threading.Thread(target=thread_func, kwargs=kwargs)
+def run_threaded(thread_func: callable, name: str, kwargs: dict):
+    job_thread = threading.Thread(target=thread_func, daemon=True, name=name, kwargs=kwargs)
     job_thread.start()
 
 
@@ -99,6 +98,7 @@ if __name__ == "__main__":
         interval = 60 * 3
         schedule.every(interval).seconds.do(
             run_threaded,
+            name="comment_on_new_threads",
             thread_func=automod_comment_on_new_threads,
             kwargs={
                 "config": config,
@@ -139,6 +139,7 @@ if __name__ == "__main__":
             schedule.every().day.at(time_utc, "UTC").do(
                 run_threaded,
                 thread_func=mirror,
+                name="mirror_daily",
                 kwargs={
                     "reddit": reddit,
                     "database": database,
@@ -147,6 +148,7 @@ if __name__ == "__main__":
                     "reddit_filter_limit": filter_limit,
                     "mirror_delay": mirror_delay_s,
                     "cancel_after_first_run": False,
+                    "lemmy": lemmy,
                 },
             )
             logging.info(
@@ -161,6 +163,7 @@ if __name__ == "__main__":
             schedule.every(mirror_s).seconds.do(
                 run_threaded,
                 thread_func=mirror,
+                name="mirror_every_x_seconds",
                 kwargs={
                     "reddit": reddit,
                     "database": database,
@@ -169,6 +172,7 @@ if __name__ == "__main__":
                     "reddit_filter_limit": filter_limit,
                     "mirror_delay": mirror_delay_s,
                     "cancel_after_first_run": False,
+                    "lemmy": lemmy,
                 },
             )
 
@@ -184,6 +188,7 @@ if __name__ == "__main__":
                 reddit_filter_limit=filter_limit,
                 mirror_delay=mirror_delay_s,
                 cancel_after_first_run=True,
+                lemmy=lemmy,
             )
             logging.info(
                 f"TASK: Mirroring threads every {mirror_s} seconds with a delay of {mirror_delay_s} seconds between threads"
@@ -219,9 +224,11 @@ if __name__ == "__main__":
         with database:
             while True:
                 schedule.run_pending()
+                sleep(5)
 
     else:
         # otherwise, run without database
         logging.info(f"Scheduler started")
         while True:
             schedule.run_pending()
+            sleep(5)
