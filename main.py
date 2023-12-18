@@ -2,7 +2,8 @@ import logging
 import os
 import random
 import threading
-from time import sleep 
+from time import sleep
+
 import praw
 import schedule
 from pythorhead import Lemmy
@@ -35,12 +36,11 @@ def mirror(
     cancel_after_first_run: bool = False,
     lemmy: Lemmy = None,
 ) -> None:
-
     logging.info("Task is running on thread %s" % threading.current_thread())
 
     if not reddit or not lemmy:
         return
-    
+
     threads = get_threads_from_reddit(
         reddit,
         config.REDDIT_SUBREDDIT,
