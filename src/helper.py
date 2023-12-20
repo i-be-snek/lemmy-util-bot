@@ -28,6 +28,7 @@ class RedditThread(Enum):
     body: str = "body"
     image: str = "image"
     reddit_gallery: str = "reddit_gallery"
+    rule_1: str = "rule_1"
 
 
 @unique
@@ -66,7 +67,8 @@ class Config:
         "FILESTACK_APP_SECRET",
         "FILESTACK_HANDLE_REFRESH",
         "FILESTACK_HANDLE_BACKUP",
-        "FILESTACK_HANDLE_MOD_MESSAGE" "REDDIT_MIRROR_SCHEDULE_TYPE",
+        "FILESTACK_HANDLE_MOD_MESSAGE",
+        "REDDIT_MIRROR_SCHEDULE_TYPE",
     )
 
     configs_with_defaults: tuple = (

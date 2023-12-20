@@ -19,6 +19,16 @@ logging.basicConfig(
 )
 
 
+def _rule_1_check_funday_friday_flair(flair: str) -> Union[bool, None]:
+    # if "Fun" in the flair and the day is not Friday
+    from datetime import datetime
+
+    if flair:
+        if flair.find("Fun") == 1 and datetime.now().strftime("%A") == "Friday":
+            # ...then ignore
+            return True
+
+
 def _extract_threads_to_mirror(
     listing: ListingGenerator,
     DB: TinyDB,
@@ -95,6 +105,7 @@ def _extract_threads_to_mirror(
             RedditThread.body: only_has_body,
             RedditThread.image: True if image else None,
             RedditThread.reddit_gallery: reddit_gallery,
+            RedditThread.rule_1: _rule_1_check_funday_friday_flair(flair),
         }
 
         for t in ignore_thread_types:
