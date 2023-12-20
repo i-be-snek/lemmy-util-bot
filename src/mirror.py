@@ -24,7 +24,7 @@ def _rule_1_check_funday_friday_flair(flair: str) -> Union[bool, None]:
     from datetime import datetime
 
     if flair:
-        if flair.find("Fun") == 1 and datetime.now().strftime("%A") == "Friday":
+        if flair.find("Fun") == 1 and datetime.now().strftime("%A") != "Friday":
             # ...then ignore
             return True
 
